@@ -2,10 +2,14 @@ import System (getArgs)
 import Data.Map hiding (map)
 import Database.TokyoCabinet
 import qualified Data.ByteString.Char8 as B
+import qualified Data.ByteString.Lazy as BL
 import Text.JSONb
 import JSON2Graph
 import System.IO
 import Control.Monad.Trans
+import qualified Data.Binary as D
+import Codec.Compression.GZip
+import System.IO
 
 fetch :: String -> Maybe Int -> Maybe Int -> TCM Graph    
 fetch fileName maxElems progress = do
@@ -46,8 +50,11 @@ main = do
           x:_ -> (x,Nothing,Just 10000)
           _ -> error "need a file name for the cabinet"
   let println = Prelude.putStrLn
-  println ("file: " ++ fileName ++ ", maxElems: " ++ (show maxElems) ++ ", progress: " ++ (show progress))
+  hPutStrLn stderr ("file: " ++ fileName ++ ", maxElems: " ++ (show maxElems) ++ ", progress: " ++ (show progress))
   -- (pack key) below for ByteString:
   graph <- runTCM (fetch fileName maxElems progress)
-  println . show $ graph
-    
+  -- println . show $ graph
+  -- println (show . size $ graph)
+  hPutStrLn stderr "well, let's save it now, shall we?"
+  BL.putStr (compress . D.encode $ graph)
+  
