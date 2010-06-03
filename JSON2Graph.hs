@@ -34,7 +34,7 @@ json2AdjList b =
 -- or we can have a single function parsing with pattern guards
 
 json2adj :: JSON -> AdjList
-json2adj (Object o) = M.fromList (zip days reps)
+json2adj (Object o) = days `seq` reps `seq` M.fromList (zip days reps)
   where lo = T.toList o
         (ks,vs) = unzip lo
         days = map (read . B.unpack) ks
@@ -42,7 +42,7 @@ json2adj (Object o) = M.fromList (zip days reps)
 j2adj _ = error "bad adj"
 
 json2reps :: JSON -> Reps 
-json2reps (Object o) = M.fromList (zip users nums)
+json2reps (Object o) = users `seq` nums `seq` M.fromList (zip users nums)
   where lo = T.toList o
         (users,vs) = unzip lo
         nums = map json2num vs
