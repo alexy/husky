@@ -1,13 +1,13 @@
 module SocRun (
   UserStats,
   DCaps,
-  SocRun,
-  socRun
+  SGraph(..),
+  SocRun, socRun, optSocRun
   )
 -- TODO exports
 where
 
-import JSON2Graph (User, Day, Graph)
+import Graph
 import Data.List (groupBy,foldl1')
 import Data.Foldable (foldl')
 import Data.Function (on)

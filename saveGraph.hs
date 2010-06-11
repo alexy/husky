@@ -4,6 +4,10 @@ import TokyoGraph
 import Database.TokyoCabinet
 import System.IO
 
+import qualified Data.ByteString.Lazy as BL
+import qualified Data.Binary as D
+import Codec.Compression.GZip
+
 main :: IO ()
 main = do
   args  <-  getArgs
@@ -20,5 +24,5 @@ main = do
   -- println . show $ graph
   -- println (show . size $ graph)
   eprintln "well, let's save it now, shall we?"
-  saveGraph graph
+  printGraph graph
   

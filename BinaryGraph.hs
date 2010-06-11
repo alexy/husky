@@ -1,4 +1,4 @@
-module BinaryGraph (loadGraph,saveGraph) where
+module BinaryGraph (loadGraph,printGraph,saveGraph) where
   
 import Graph
 import qualified Data.ByteString.Lazy as BL
@@ -12,6 +12,9 @@ loadGraph fileName = do
   return g
 
 -- sends to stdout
-saveGraph :: Graph -> IO ()
-saveGraph graph =
+-- saveGraph :: Graph -> IO ()
+printGraph graph =
   BL.putStr (compress . D.encode $ graph)
+    
+saveGraph graph fileName =
+  BL.writeFile fileName . compress . D.encode $ graph 
