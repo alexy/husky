@@ -1,7 +1,7 @@
 module SocRun where
 
 import JSON2Graph (User, Day, Graph)
-import Data.List (groupBy)
+import Data.List (groupBy,foldl1')
 import Data.Foldable (foldl')
 import Data.Function (on)
 import qualified Data.Map as M
@@ -9,6 +9,10 @@ import Data.Map ((!))
 import Data.List (maximum)
 import System.IO
 import Debug.Trace
+import Data.Maybe
+import Control.Monad ((>=>))
+--import Data.Nthable -- generalized fst
+--import Prelude hiding (fst,snd)
 
 -- errln x = 
 --   hPrint stderr x
@@ -100,4 +104,159 @@ socRun dreps dments opts =
     in
       foldl' tick sgraph [firstDay..lastDay]
 
-socDay sgraph params day = undefined
+-- socDay sgraph params day = undefined
+
+safeDivide :: (Fractional a) => a -> a -> a
+safeDivide x 0 = x
+safeDivide x y = x / y  
+
+-- fst3 (x,_,_) = x
+
+safeDivide3 (x,y,z) (x',y',z') = 
+  let
+    a = safeDivide x x'
+    b = safeDivide y y'
+    c = safeDivide z z'
+  in (a,b,c)
+  
+socDay sgraph params day =
+  let 
+    (alpha, beta, gamma) = params
+    SGraph {ustatsSG =ustats, dcapsSG =dcaps} = sgraph
+    users = M.keys ustats
+    
+    termsStats = map (socUserDaySum sgraph day) users
+    sumTerms   = trace ("got sumTerms, length " ++ (show . length $ sumTerms)) 
+                 map fst termsStats
+        
+    -- norms = foldl1' (zipWith (+)) sumTerms
+    norms = foldl1' (\(x,y,z) (x',y',z') -> (x+x',y+y',z+z')) (catMaybes sumTerms)
+
+    tick user (numers,stats) =
+      let
+        soc = socUS stats
+        soc' = 
+          case numers of
+            Just numers ->
+              let (outs', insBack', insAll') =
+                   -- map safeDivide numers norms 
+                   safeDivide3 numers norms
+              in
+              alpha * soc + (1 - alpha) * 
+                (beta * outs' + (1 - beta) * 
+                  (gamma * insBack' + (1 - gamma) * insAll'))
+            Nothing -> alpha * soc
+        stats' =  stats {socUS = soc'}
+        in
+        (user,stats)
+             
+    ustats' = trace "got ustats" M.fromList $ zipWith tick users termsStats
+    
+    -- day in fn is the same day as soc-day param day
+    -- TODO fold[l/r]WithKey?
+    dcaps' = M.foldlWithKey updateUser dcaps ustats'
+      where
+        updateUser res user userStats =
+          let UserStats{dayUS =day, socUS =soc} = userStats
+              -- TODO the equations differ only in the tail map, can simplify
+              -- addDay (Just days) = Just (M.insert day soc days)
+              -- addDay _ = Just (M.insert day soc M.empty) -- M.fromList [(day,soc)]
+              -- M.singleton is shorter still, but this is real good, all by kmc:
+              addDay m = let res = M.insert day soc $ fromMaybe M.empty m in Just res
+          in 
+          M.alter addDay user res
+    in
+    sgraph {ustatsSG= ustats', dcapsSG= dcaps'}
+
+-- socUserDaySum sgraph day user = undefined
+
+getUserDay user day = M.lookup user >=> M.lookup day
+
+-- we started writing this and BMeph finished, but Map has findWithDefault already:
+-- lookupWithDefault d = fromMaybe d . flip M.lookup
+
+getSoccap ustats user =
+  case M.lookup user ustats of
+    Just UserStats{socUS =soc} -> soc
+    _ -> 0
+  
+socUserDaySum sgraph day user = 
+  let 
+    SGraph {drepsSG =dreps, dmentsSG =dments, ustatsSG =ustats} = sgraph
+    stats = ustats ! user
+    dr_ = getUserDay user day dreps
+    dm_ = getUserDay user day dments
+    in
+      
+    if not (isJust dr_ || isJust dm_) then
+        (Nothing, stats)
+    else
+      -- we had edges this cycle -- now let's dance and compute the change!
+      let         
+        UserStats {socUS =soc, dayUS =day, insUS =ins, outsUS =outs, totUS =tot, balUS =bal} = stats
+                
+        socStep pred res to num =
+          let toBal = M.findWithDefault 0 to bal in 
+          if not (pred toBal) then 0
+          else
+            let toSoc = getSoccap ustats to in
+              if toSoc == 0 then 0
+              else
+                let 
+                  toTot = M.findWithDefault 1 to tot
+                  term = fromIntegral (num * toBal * toTot) * toSoc 
+                  in
+                  res + term
+
+        -- find all those who talked to us in the past to whom we replied now
+        outSum = 
+          case dr_ of
+            Nothing -> 0
+            Just dr ->
+              M.foldlWithKey (socStep (<0)) 0 dr
+              
+
+        inSumBack = 
+          case dm_ of
+            Nothing -> 0
+            Just dm ->
+              M.foldlWithKey (socStep (>0)) 0 dm
+
+        inSumAll = 
+          case dm_ of
+            Nothing -> 0
+            Just dm ->
+              M.foldlWithKey step 0 dm
+              where
+                step res to num =
+                  let toSoc = getSoccap ustats to in
+                    if toSoc == 0 then 0
+                    else
+                      let 
+                        toTot = M.findWithDefault 1 to tot
+                        term = fromIntegral (num * toTot) * toSoc 
+                        in
+                        res + term
+        
+        terms = (outSum, inSumBack, inSumAll)
+              
+        addMaps      = M.unionWith (+)
+        subtractMaps = M.unionWith (-)  
+        
+        ins'  = case dr_ of {Just dr -> addMaps ins dr;  _ -> ins}
+        outs' = case dm_ of {Just dm -> addMaps outs dm; _ -> outs}
+        
+        -- ziman: M.unionWith (+) `on` maybe M.empty id
+        (tot', bal')  = 
+          case (dr_, dm_) of
+            (Just dr, Nothing) -> (addMaps tot dr, addMaps bal dr)
+            (Nothing, Just dm) -> (addMaps tot dm, subtractMaps bal dm)
+            (Just dr, Just dm) -> 
+              let t = addMaps dr $ addMaps tot dm
+                  b = addMaps dr $ subtractMaps bal dm
+              in
+              (t,b)
+        
+        stats' = stats {insUS= ins', outsUS= outs', totUS= tot', balUS= bal'}
+        in
+        (Just terms, stats')
