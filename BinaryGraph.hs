@@ -17,4 +17,4 @@ printGraph graph =
   BL.putStr (compress . D.encode $ graph)
     
 saveGraph graph fileName =
-  BL.writeFile fileName . compress . D.encode $ graph 
+  BL.writeFile fileName $ compress . D.encode $ graph 

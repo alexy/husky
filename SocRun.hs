@@ -161,9 +161,9 @@ socDay sgraph params day =
     
     -- day in fn is the same day as soc-day param day
     -- TODO fold[l/r]WithKey?
-    dcaps' = M.foldlWithKey updateUser dcaps ustats'
+    dcaps' = M.foldWithKey updateUser dcaps ustats'
       where
-        updateUser res user userStats =
+        updateUser user userStats res =
           let UserStats{dayUS =day, socUS =soc} = userStats
               -- TODO the equations differ only in the tail map, can simplify
               -- addDay (Just days) = Just (M.insert day soc days)
@@ -201,8 +201,10 @@ socUserDaySum sgraph day user =
       -- we had edges this cycle -- now let's dance and compute the change!
       let         
         UserStats {socUS =soc, dayUS =day, insUS =ins, outsUS =outs, totUS =tot, balUS =bal} = stats
-                
-        socStep pred res to num =
+         
+        -- changing order from foldlWithKey to foldWithKey's
+        -- to be able to run under GHC 6.10
+        socStep pred to num res =
           let toBal = M.findWithDefault 0 to bal in 
           if not (pred toBal) then 0
           else
@@ -220,22 +222,22 @@ socUserDaySum sgraph day user =
           case dr_ of
             Nothing -> 0
             Just dr ->
-              M.foldlWithKey (socStep (<0)) 0 dr
+              M.foldWithKey (socStep (<0)) 0 dr
               
 
         inSumBack = 
           case dm_ of
             Nothing -> 0
             Just dm ->
-              M.foldlWithKey (socStep (>0)) 0 dm
+              M.foldWithKey (socStep (>0)) 0 dm
 
         inSumAll = 
           case dm_ of
             Nothing -> 0
             Just dm ->
-              M.foldlWithKey step 0 dm
+              M.foldWithKey step 0 dm
               where
-                step res to num =
+                step to num res =
                   let toSoc = getSoccap ustats to in
                     if toSoc == 0 then 0
                     else
