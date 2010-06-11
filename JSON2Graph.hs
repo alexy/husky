@@ -1,12 +1,8 @@
 module JSON2Graph (
-  json2graph,
-  AdjList,
-  Graph,
-  User,
-  Day,
-  Reps,
+  json2graph
   ) where
 
+import Graph
 import qualified Data.Trie as T
 import Text.JSONb
 import qualified Data.Map as M
@@ -18,11 +14,6 @@ import Data.Maybe
 js = B.pack "{\"9\":{\"jovenatheart\":1},\"10\":{\"beverlyyanga\":1},\"31\":{\"mcshellyshell\":1}}"
 jo = case decode js of {Right r -> r; _ -> error "can't parse json"}
 
-type Graph = M.Map User AdjList
-type AdjList = M.Map Day Reps      
-type User = B.ByteString
-type Day = Int
-type Reps = M.Map User Int
 
 json2AdjList :: B.ByteString -> AdjList
 json2AdjList b = 

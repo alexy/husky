@@ -1,4 +1,11 @@
-module SocRun where
+module SocRun (
+  UserStats,
+  DCaps,
+  SocRun,
+  socRun
+  )
+-- TODO exports
+where
 
 import JSON2Graph (User, Day, Graph)
 import Data.List (groupBy,foldl1')
