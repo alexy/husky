@@ -4,11 +4,14 @@ import qualified Data.Map as M
 import BinaryGraph
 import SocRun
 
+eprintln s = do
+	hPutStrLn stderr s
+	hFlush stderr
+
 main :: IO ()
 main = do
   args <- getArgs
   let [drepsName,dmentsName,saveName] = args
-  let eprintln = hPutStrLn stderr -- can add hFlush stderr as well
   eprintln ("reading graph from " ++ drepsName ++ ", " ++ dmentsName ++ 
   	", saving dcaps in " ++ saveName)
   dreps <- loadGraph drepsName
@@ -18,5 +21,5 @@ main = do
   
   let SGraph{dcapsSG =dcaps} = socRun dreps dments optSocRun
   eprintln ("computed sgraph, now saving dcaps in " ++ saveName)
-  printGraph dcaps -- saveName
-  
+  printGraph dcaps
+  -- saveGraph dcaps saveName
