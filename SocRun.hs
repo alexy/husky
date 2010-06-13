@@ -104,9 +104,9 @@ socRun dreps dments opts =
                     dstarts ! day
         newUstats = M.fromList $ map (\u -> (u,newUserStats socInit day)) newUsers 
         ustats'   = M.union ustats newUstats
-        sgraph    = sgraph {ustatsSG = ustats'}
+        sgraph'   = sgraph {ustatsSG = ustats'}
         in
-        socDay sgraph params day
+        socDay sgraph' params day
 
     in
       foldl' tick sgraph [firstDay..lastDay]
@@ -155,7 +155,7 @@ socDay sgraph params day =
             Nothing -> alpha * soc
         stats' =  stats {socUS = soc'}
         in
-        (user,stats)
+        (user,stats')
              
     ustats' = trace "got ustats" M.fromList $ zipWith tick users termsStats
     
