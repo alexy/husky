@@ -1,0 +1,54 @@
+	Sun Jun 13 21:21 2010 Time and Allocation Profiling Report  (Final)
+
+	   sc +RTS -A5G -K5G -p -RTS tokyo/dreps.bin.zip tokyo/dments.bin.zip whatever 10
+
+	total time  =      547.78 secs   (27389 ticks @ 20 ms)
+	total alloc = 167,805,084,976 bytes  (excludes profiling overheads)
+
+COST CENTRE                    MODULE               %time %alloc
+
+socDay                         SocRun                33.3   39.4
+getUserDay                     SocRun                13.0    0.7
+loadGraph                      BinaryGraph           12.4   29.2
+socUserDaySum                  SocRun                12.1    7.3
+socRun                         SocRun                 9.9    9.6
+getSoccap                      SocRun                 9.3    0.1
+saveGraph                      BinaryGraph            5.9    6.7
+dayRanges                      SocRun                 1.6    4.7
+minMax1                        SocRun                 0.9    1.4
+
+
+                                                                                               individual    inherited
+COST CENTRE              MODULE                                               no.    entries  %time %alloc   %time %alloc
+
+MAIN                     MAIN                                                   1           0   0.0    0.0   100.0  100.0
+ main                    Main                                                 328           1   0.0    0.0   100.0  100.0
+  socRun                 SocRun                                               333           5   9.9    9.6    81.7   64.1
+   paramSC               SocRun                                               343           1   0.0    0.0     0.0    0.0
+   socDay                SocRun                                               339          30  33.3   39.4    69.2   48.3
+    safeDivide3          SocRun                                               344    23106380   0.6    0.6     1.5    0.8
+     safeDivide          SocRun                                               345    17329785   0.9    0.2     0.9    0.2
+    socUserDaySum        SocRun                                               340    39937417  12.1    7.3    34.4    8.1
+     getSoccap           SocRun                                               346     6904303   9.3    0.1     9.3    0.1
+     getUserDay          SocRun                                               341    31131204  13.0    0.7    13.0    0.7
+   newUserStats          SocRun                                               338          10   0.0    0.0     0.0    0.0
+    emptyTalk            SocRun                                               342          20   0.0    0.0     0.0    0.0
+   minMax2               SocRun                                               337     1943123   0.1    0.1     0.1    0.1
+   dayRanges             SocRun                                               335    34045407   1.6    4.7     2.5    6.2
+    minMax1              SocRun                                               336    27415614   0.9    1.4     0.9    1.4
+  saveGraph              BinaryGraph                                          332           1   5.9    6.7     5.9    6.7
+  loadGraph              BinaryGraph                                          331           2  12.4   29.2    12.4   29.2
+  eprintln               Main                                                 329           4   0.0    0.0     0.0    0.0
+ CAF                     Main                                                 322           8   0.0    0.0     0.0    0.0
+  main                   Main                                                 330           0   0.0    0.0     0.0    0.0
+ CAF                     GHC.Read                                             297           1   0.0    0.0     0.0    0.0
+ CAF                     Text.Read.Lex                                        290           8   0.0    0.0     0.0    0.0
+ CAF                     GHC.Handle                                           274           7   0.0    0.0     0.0    0.0
+ CAF                     GHC.Conc                                             273           1   0.0    0.0     0.0    0.0
+ CAF                     GHC.IO                                               247           1   0.0    0.0     0.0    0.0
+ CAF                     Codec.Compression.Zlib.Internal                      220           3   0.0    0.0     0.0    0.0
+ CAF                     Codec.Compression.Zlib.Stream                        219           1   0.0    0.0     0.0    0.0
+ CAF                     SocRun                                               183           5   0.0    0.0     0.0    0.0
+  socRun                 SocRun                                               334           0   0.0    0.0     0.0    0.0
+ CAF                     Debug.Trace                                          182           1   0.0    0.0     0.0    0.0
+ CAF                     System.Environment                                   165           2   0.0    0.0     0.0    0.0
