@@ -1,7 +1,7 @@
 Twitter Graph in Haskell
 ========================
 
-Haskell-Cafe patrons: head straight for [the Haskell vs Clojure making-it-just-work and then -better challenge!](Haskell-vs-Clojure-Twitter.md)
+Haskell-Cafe patrons: head straight for [the Haskell vs Clojure making-it-just-work and then -better challenge!](husky/Haskell-vs-Clojure-Twitter.md)
 
 Here we analyze Twitter communication graph.  We load it from TokyoCabinet, where it's represented as pairs
 
