@@ -30,4 +30,4 @@ I implemented this world originally in Clojure, shown here as `socrun.clj`, and 
 
 Clojure goes through all 35 days in about 35 minutes, staying within a 32 GB JVM with compressed references.  Initially, the SocRun version without any `seq` statements added ran through day 30, reaching about 57 GB, and just stayed there for a day without much swapping.  Adding a maxDays parameter allowed to try smaller day run, which caused stack overflow, suggesting increasing the stack size.  Throwing in a quick `-K5G` after an `-A5G` which have already sped up things 1000x allowed to run through for 10 days fairly quickly.  While not getting orders of magnitude advantage over Clojure, I still saw significant speedup, at least about 2x.  However, 20 days still ended up sitting there doing nothing.
 
-There's [a profiling run for 10 days](husky/blob/master/sc10days.prof).
+There's [a profiling run for 10 days](sc10days.prof).
