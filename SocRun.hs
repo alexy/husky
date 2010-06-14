@@ -2,7 +2,7 @@ module SocRun (
   UserStats,
   DCaps,
   SGraph(..),
-  SocRun, socRun, optSocRun
+  SocRun(..), socRun, optSocRun
   )
 -- TODO exports
 where
@@ -45,8 +45,9 @@ newUserStats soc day = UserStats {socUS = soc, dayUS = day,
   insUS = emptyTalk, outsUS = emptyTalk, totUS = emptyTalk, balUS = emptyTalk}
 
 type UStats = M.Map User UserStats
-data SocRun = SocRun {alphaSR :: Float, betaSR :: Float, gammaSR :: Float, socInitSR :: Float}
-optSocRun = SocRun 0.00001 0.5 0.5 1.0
+data SocRun = SocRun {alphaSR :: Float, betaSR :: Float, gammaSR :: Float, 
+                      socInitSR :: Float, maxDaysSR :: Maybe Int}
+optSocRun = SocRun 0.00001 0.5 0.5 1.0 Nothing
 
 data SGraph = SGraph {drepsSG :: Graph, dmentsSG :: Graph, dcapsSG :: DCaps, ustatsSG :: UStats}
 
@@ -95,9 +96,11 @@ socRun dreps dments opts =
         
       -- elemAt 0 dstarts -- would return in insertion order, which is OK here too:
       firstDay = fst . head . M.toAscList $ dstarts
-      lastDay  = let x = maximum . map (snd . snd) $ dranges in
-                   trace ("doing days from " ++ (show firstDay) ++ " to " ++ (show x))
-                   x
+      lastDay  = let x  = maximum . map (snd . snd) $ dranges 
+                     x' = maybe x (\y -> min x (firstDay + y - 1)) (maxDaysSR opts)
+      			 in
+                   trace ("doing days from " ++ (show firstDay) ++ " to " ++ (show x'))
+                   x'
       
       
       tick sgraph day = 
@@ -109,7 +112,7 @@ socRun dreps dments opts =
                         x
           newUstats = M.fromList $ map (\u -> (u,newUserStats socInit day)) newUsers 
           ustats'   = M.union ustats newUstats
-          sgraph'   = sgraph {ustatsSG = ustats'}
+          sgraph'   = ustats' `seq` sgraph {ustatsSG = ustats'}
         in
           socDay sgraph' params day
       
@@ -160,7 +163,7 @@ socDay sgraph params day =
             Nothing -> alpha * soc
         stats' =  stats {socUS = soc'}
         in
-        (user,stats')
+        stats' `seq` (user,stats')
              
     ustats' = -- trace "got ustats" 
               M.fromList $ zipWith tick users termsStats
@@ -175,11 +178,11 @@ socDay sgraph params day =
               -- addDay (Just days) = Just (M.insert day soc days)
               -- addDay _ = Just (M.insert day soc M.empty) -- M.fromList [(day,soc)]
               -- M.singleton is shorter still, but this is real good, all by kmc:
-              addDay m = let res = M.insert day soc $ fromMaybe M.empty m in Just res
+              addDay m = let res = m `seq` soc `seq` M.insert day soc $ fromMaybe M.empty m in Just res
           in 
-          M.alter addDay user res
+          res `seq` M.alter addDay user res
     in
-    sgraph {ustatsSG= ustats', dcapsSG= dcaps'}
+    ustats' `seq` dcaps' `seq` sgraph {ustatsSG= ustats', dcapsSG= dcaps'}
 
 -- socUserDaySum sgraph day user = undefined
 
@@ -221,21 +224,21 @@ socUserDaySum sgraph day user =
                   toTot = M.findWithDefault 1 to tot
                   term = fromIntegral (num * toBal * toTot) * toSoc 
                   in
-                  res + term
+                  res `seq` term `seq` res + term
 
         -- find all those who talked to us in the past to whom we replied now
         outSum = 
           case dr_ of
             Nothing -> 0
             Just dr ->
-              M.foldWithKey (socStep (<0)) 0 dr
+              dr `seq` M.foldWithKey (socStep (<0)) 0 dr
               
 
         inSumBack = 
           case dm_ of
             Nothing -> 0
             Just dm ->
-              M.foldWithKey (socStep (>0)) 0 dm
+              dm `seq` M.foldWithKey (socStep (>0)) 0 dm
 
         inSumAll = 
           case dm_ of
@@ -251,7 +254,7 @@ socUserDaySum sgraph day user =
                         toTot = M.findWithDefault 1 to tot
                         term = fromIntegral (num * toTot) * toSoc 
                         in
-                        res + term
+                        res `seq` term `seq` res + term
         
         terms = (outSum, inSumBack, inSumAll)
               
@@ -274,4 +277,4 @@ socUserDaySum sgraph day user =
         
         stats' = stats {insUS= ins', outsUS= outs', totUS= tot', balUS= bal'}
         in
-        (Just terms, stats')
+        terms `seq` stats' `seq` (Just terms, stats')
