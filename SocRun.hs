@@ -8,7 +8,8 @@ module SocRun (
 where
 
 import Graph
-import Data.List (groupBy,foldl1')
+import Data.Ord (comparing)
+import Data.List (groupBy,sortBy,foldl1')
 import Data.Foldable (foldl')
 import Data.Function (on)
 import qualified Data.Map as M
@@ -69,7 +70,7 @@ dayRanges :: Graph -> M.Map User (Int, Int)
 dayRanges dreps = M.map doDays dreps
   where
     doDays days =
-      let (start, _) = M.elemAt 0 days -- i.e. "any map entry"     
+      let (start, _) = M.elemAt 0 days -- i.e. "any map entry"
           range = foldl' minMax1 (start, start) (M.keys days) in
           range
 
@@ -77,37 +78,41 @@ dayRanges dreps = M.map doDays dreps
 -- mergeDayRanges dr1 dr2 = M.unionWith min_max dr1 dr2
 
 -- socRun :: Graph -> Graph -> SocRun -> IO ()
-socRun dreps dments opts =      
+socRun dreps dments opts =
     let 
-    params  = paramSC opts 
-    socInit = socInitSR opts
-    dcaps   = M.empty -- TODO type
-    ustats  = M.empty -- type
-    sgraph  = SGraph dreps dments dcaps ustats
-    dranges = M.toList $ M.unionsWith minMax2 (map dayRanges [dreps, dments])
-
-    dstarts = M.fromList $ map dayUsers (groupBy ((==) `on` snd) dranges)
-      where
-        dayUsers g = let day = fst . snd . head $ g in (day, map fst g)
+      params  = paramSC opts 
+      socInit = socInitSR opts
+      dcaps   = M.empty -- TODO type
+      ustats  = M.empty -- type
+      sgraph  = SGraph dreps dments dcaps ustats
+      getFirstDay = fst . snd
+      dranges = let x = sortBy (comparing getFirstDay) . M.toList $ M.unionsWith minMax2 (map dayRanges [dreps, dments]) in
+                  trace ("dranges has length " ++ (show . length $ x)) x
       
-    -- elemAt 0 dstarts -- would return in insertion order, which is OK here too:
-    firstDay = fst . head . M.toAscList $ dstarts  
-    lastDay  = trace ("doing days from " ++ (show firstDay) ++ " to " ++ (show lastDay)) 
-               maximum . map (snd . snd) $ dranges  
-  
-    
-    tick sgraph day = 
-    -- inject the users first appearing in this cycle
-      let 
-        ustats    = ustatsSG sgraph
-        newUsers  = trace ("adding " ++ (show . length $ newUsers) ++ " new users on day " ++ (show day)) 
-                    dstarts ! day
-        newUstats = M.fromList $ map (\u -> (u,newUserStats socInit day)) newUsers 
-        ustats'   = M.union ustats newUstats
-        sgraph'   = sgraph {ustatsSG = ustats'}
+      dstarts = M.fromList $ map dayUsers (groupBy ((==) `on` getFirstDay) dranges)
+        where
+          dayUsers g = let day = getFirstDay . head $ g in (day, map fst g)
+        
+      -- elemAt 0 dstarts -- would return in insertion order, which is OK here too:
+      firstDay = fst . head . M.toAscList $ dstarts
+      lastDay  = let x = maximum . map (snd . snd) $ dranges in
+                   trace ("doing days from " ++ (show firstDay) ++ " to " ++ (show x))
+                   x
+      
+      
+      tick sgraph day = 
+      -- inject the users first appearing in this cycle
+        let 
+          ustats    = ustatsSG sgraph
+          newUsers  = let x = dstarts ! day in
+                        trace ("adding " ++ (show . length $ x) ++ " new users on day " ++ (show day))
+                        x
+          newUstats = M.fromList $ map (\u -> (u,newUserStats socInit day)) newUsers 
+          ustats'   = M.union ustats newUstats
+          sgraph'   = sgraph {ustatsSG = ustats'}
         in
-        socDay sgraph' params day
-
+          socDay sgraph' params day
+      
     in
       foldl' tick sgraph [firstDay..lastDay]
 
@@ -133,7 +138,7 @@ socDay sgraph params day =
     users = M.keys ustats
     
     termsStats = map (socUserDaySum sgraph day) users
-    sumTerms   = trace ("got sumTerms, length " ++ (show . length $ sumTerms)) 
+    sumTerms   = -- trace ("got sumTerms, length " ++ (show . length $ sumTerms)) 
                  map fst termsStats
         
     -- norms = foldl1' (zipWith (+)) sumTerms
@@ -157,7 +162,8 @@ socDay sgraph params day =
         in
         (user,stats')
              
-    ustats' = trace "got ustats" M.fromList $ zipWith tick users termsStats
+    ustats' = -- trace "got ustats" 
+              M.fromList $ zipWith tick users termsStats
     
     -- day in fn is the same day as soc-day param day
     -- TODO fold[l/r]WithKey?
