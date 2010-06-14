@@ -1,3 +1,6 @@
+{-# LANGUAGE BangPatterns #-}
+
+
 module SocRun (
   UserStats,
   DCaps,
@@ -45,22 +48,22 @@ newUserStats soc day = UserStats {socUS = soc, dayUS = day,
   insUS = emptyTalk, outsUS = emptyTalk, totUS = emptyTalk, balUS = emptyTalk}
 
 type UStats = M.Map User UserStats
-data SocRun = SocRun {alphaSR :: Float, betaSR :: Float, gammaSR :: Float, 
-                      socInitSR :: Float, maxDaysSR :: Maybe Int}
+data SocRun = SocRun {alphaSR :: !Float, betaSR :: !Float, gammaSR :: !Float, 
+                      socInitSR :: !Float, maxDaysSR :: Maybe Int}
 optSocRun = SocRun 0.00001 0.5 0.5 1.0 Nothing
 
-data SGraph = SGraph {drepsSG :: Graph, dmentsSG :: Graph, dcapsSG :: DCaps, ustatsSG :: UStats}
+data SGraph = SGraph {drepsSG :: !Graph, dmentsSG :: !Graph, dcapsSG :: !DCaps, ustatsSG :: !UStats}
 
 paramSC (SocRun {alphaSR =a, betaSR =b, gammaSR =g}) = (a, b, g)
 
 minMax1 (oldMin, oldMax) x =
-  let newMin = oldMin `min` x
-      newMax = oldMax `max` x in
+  let !newMin = oldMin `min` x
+      !newMax = oldMax `max` x in
       (newMin, newMax)
 
 minMax2 (oldMin, oldMax) (x,y) =
-  let newMin = oldMin `min` x
-      newMax = oldMax `max` y in
+  let !newMin = oldMin `min` x
+      !newMax = oldMax `max` y in
       (newMin, newMax)
 
 -- find the day range when each user exists in dreps
@@ -71,7 +74,7 @@ dayRanges :: Graph -> M.Map User (Int, Int)
 dayRanges dreps = M.map doDays dreps
   where
     doDays days =
-      let (start, _) = M.elemAt 0 days -- i.e. "any map entry"
+      let (!start, _) = M.elemAt 0 days -- i.e. "any map entry"
           range = foldl' minMax1 (start, start) (M.keys days) in
           range
 
@@ -95,12 +98,12 @@ socRun dreps dments opts =
           dayUsers g = let day = getFirstDay . head $ g in (day, map fst g)
         
       -- elemAt 0 dstarts -- would return in insertion order, which is OK here too:
-      firstDay = fst . head . M.toAscList $ dstarts
-      lastDay  = let x  = maximum . map (snd . snd) $ dranges 
-                     x' = maybe x (\y -> min x (firstDay + y - 1)) (maxDaysSR opts)
-      			 in
-                   trace ("doing days from " ++ (show firstDay) ++ " to " ++ (show x'))
-                   x'
+      !firstDay = fst . head . M.toAscList $ dstarts
+      !lastDay  = let x  = maximum . map (snd . snd) $ dranges 
+                      x' = maybe x (\y -> min x (firstDay + y - 1)) (maxDaysSR opts)
+      			      in
+                    trace ("doing days from " ++ (show firstDay) ++ " to " ++ (show x'))
+                    x'
       
       
       tick sgraph day = 
@@ -110,7 +113,7 @@ socRun dreps dments opts =
           newUsers  = let x = dstarts ! day in
                         trace ("adding " ++ (show . length $ x) ++ " new users on day " ++ (show day))
                         x
-          newUstats = M.fromList $ map (\u -> (u,newUserStats socInit day)) newUsers 
+          !newUstats = M.fromList $ map (\u -> (u,newUserStats socInit day)) newUsers 
           ustats'   = M.union ustats newUstats
           sgraph'   = ustats' `seq` sgraph {ustatsSG = ustats'}
         in
@@ -129,9 +132,9 @@ safeDivide x y = x / y
 
 safeDivide3 (x,y,z) (x',y',z') = 
   let
-    a = safeDivide x x'
-    b = safeDivide y y'
-    c = safeDivide z z'
+    !a = safeDivide x x'
+    !b = safeDivide y y'
+    !c = safeDivide z z'
   in (a,b,c)
   
 socDay sgraph params day =
@@ -145,7 +148,7 @@ socDay sgraph params day =
                  map fst termsStats
         
     -- norms = foldl1' (zipWith (+)) sumTerms
-    norms = foldl1' (\(x,y,z) (x',y',z') -> (x+x',y+y',z+z')) (catMaybes sumTerms)
+    norms = foldl1' (\(!x,!y,!z) (!x',!y',!z') -> (x+x',y+y',z+z')) (catMaybes sumTerms)
 
     tick user (numers,stats) =
       let
@@ -165,7 +168,7 @@ socDay sgraph params day =
         in
         stats' `seq` (user,stats')
              
-    ustats' = -- trace "got ustats" 
+    !ustats' = -- trace "got ustats" 
               M.fromList $ zipWith tick users termsStats
     
     -- day in fn is the same day as soc-day param day
@@ -199,7 +202,7 @@ getSoccap ustats user =
 socUserDaySum sgraph day user = 
   let 
     SGraph {drepsSG =dreps, dmentsSG =dments, ustatsSG =ustats} = sgraph
-    stats = ustats ! user
+    !stats = ustats ! user
     dr_ = getUserDay user day dreps
     dm_ = getUserDay user day dments
     in
@@ -222,25 +225,25 @@ socUserDaySum sgraph day user =
               else
                 let 
                   toTot = M.findWithDefault 1 to tot
-                  term = fromIntegral (num * toBal * toTot) * toSoc 
+                  !term = fromIntegral (num * toBal * toTot) * toSoc 
                   in
-                  res `seq` term `seq` res + term
+                  res + term
 
         -- find all those who talked to us in the past to whom we replied now
-        outSum = 
+        !outSum = 
           case dr_ of
             Nothing -> 0
             Just dr ->
-              dr `seq` M.foldWithKey (socStep (<0)) 0 dr
+              M.foldWithKey (socStep (<0)) 0 dr
               
 
-        inSumBack = 
+        !inSumBack = 
           case dm_ of
             Nothing -> 0
             Just dm ->
-              dm `seq` M.foldWithKey (socStep (>0)) 0 dm
+              M.foldWithKey (socStep (>0)) 0 dm
 
-        inSumAll = 
+        !inSumAll = 
           case dm_ of
             Nothing -> 0
             Just dm ->
@@ -252,17 +255,17 @@ socUserDaySum sgraph day user =
                     else
                       let 
                         toTot = M.findWithDefault 1 to tot
-                        term = fromIntegral (num * toTot) * toSoc 
+                        !term = fromIntegral (num * toTot) * toSoc 
                         in
-                        res `seq` term `seq` res + term
+                        res + term
         
         terms = (outSum, inSumBack, inSumAll)
               
         addMaps      = M.unionWith (+)
         subtractMaps = M.unionWith (-)  
         
-        ins'  = case dr_ of {Just dr -> addMaps ins dr;  _ -> ins}
-        outs' = case dm_ of {Just dm -> addMaps outs dm; _ -> outs}
+        !ins'  = case dr_ of {Just dr -> addMaps ins dr;  _ -> ins}
+        !outs' = case dm_ of {Just dm -> addMaps outs dm; _ -> outs}
         
         -- ziman: M.unionWith (+) `on` maybe M.empty id
         (tot', bal')  = 
@@ -275,6 +278,6 @@ socUserDaySum sgraph day user =
               in
               (t,b)
         
-        stats' = stats {insUS= ins', outsUS= outs', totUS= tot', balUS= bal'}
+        !stats' = stats {insUS= ins', outsUS= outs', totUS= tot', balUS= bal'}
         in
-        terms `seq` stats' `seq` (Just terms, stats')
+        (Just terms, stats')
