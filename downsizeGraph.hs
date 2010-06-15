@@ -16,7 +16,7 @@ main = do
     args <- getArgs
     let [inFile,outFile,maxElems'] = args
         maxElems = read maxElems' :: Int
-    hPrint stderr ("downsizing " ++ inFile ++ " to " 
+    hPutStrLn stderr ("downsizing " ++ inFile ++ " to "
                     ++ show maxElems ++ " elements into "
                     ++ outFile)
     g <- loadGraph inFile
