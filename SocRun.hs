@@ -169,9 +169,9 @@ socDay sgraph params day =
         stats' `seq` (user,stats')
              
     !ustats' = -- trace "got ustats" 
-              M.fromList $ zipWith tick users termsStats
-    
-    -- day in fn is the same day as soc-day param day
+              -- M.fromList $ zipWith tick users termsStats
+              M.mapWithKey  
+              
     -- TODO fold[l/r]WithKey?
     dcaps' = M.foldWithKey updateUser dcaps ustats'
       where
