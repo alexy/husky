@@ -141,17 +141,18 @@ socDay sgraph params day =
   let 
     (alpha, beta, gamma) = params
     SGraph {ustatsSG =ustats, dcapsSG =dcaps} = sgraph
-    users = M.keys ustats
+    -- users = M.keys ustats
     
-    termsStats = map (socUserDaySum sgraph day) users
-    sumTerms   = -- trace ("got sumTerms, length " ++ (show . length $ sumTerms)) 
-                 map fst termsStats
+    -- my bangs, needed?
+    !termsStats = M.mapWithKey (const . socUserDaySum sgraph day) ustats
+    !sumTerms   = catMaybes . map fst . M.elems $ termsStats
         
     -- norms = foldl1' (zipWith (+)) sumTerms
-    norms = foldl1' (\(!x,!y,!z) (!x',!y',!z') -> (x+x',y+y',z+z')) (catMaybes sumTerms)
+    norms = foldl1' (\(!x,!y,!z) (!x',!y',!z') -> (x+x',y+y',z+z')) sumTerms
 
-    tick user (numers,stats) =
+    tick user _ =
       let
+        (numers,stats) = termsStats ! user
         soc = socUS stats
         soc' = 
           case numers of
@@ -164,13 +165,11 @@ socDay sgraph params day =
                 (beta * outs' + (1 - beta) * 
                   (gamma * insBack' + (1 - gamma) * insAll'))
             Nothing -> alpha * soc
-        stats' =  stats {socUS = soc'}
+        !stats' =  stats {socUS = soc'}
         in
-        stats' `seq` (user,stats')
+        stats'
              
-    !ustats' = -- trace "got ustats" 
-              -- M.fromList $ zipWith tick users termsStats
-              M.mapWithKey  
+    !ustats' = M.mapWithKey tick ustats
               
     -- TODO fold[l/r]WithKey?
     dcaps' = M.foldWithKey updateUser dcaps ustats'
@@ -181,11 +180,11 @@ socDay sgraph params day =
               -- addDay (Just days) = Just (M.insert day soc days)
               -- addDay _ = Just (M.insert day soc M.empty) -- M.fromList [(day,soc)]
               -- M.singleton is shorter still, but this is real good, all by kmc:
-              addDay m = let res = m `seq` soc `seq` M.insert day soc $ fromMaybe M.empty m in Just res
+              addDay m = let res = M.insert day soc $ fromMaybe M.empty m in Just res
           in 
-          res `seq` M.alter addDay user res
+          M.alter addDay user res
     in
-    ustats' `seq` dcaps' `seq` sgraph {ustatsSG= ustats', dcapsSG= dcaps'}
+    sgraph {ustatsSG= ustats', dcapsSG= dcaps'}
 
 -- socUserDaySum sgraph day user = undefined
 
