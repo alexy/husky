@@ -1,178 +1,60 @@
-Retainer Profiling: 0, at 0.351947 seconds
-	Average number of visits per object = 1.218546
-Retainer Profiling: 1, at 0.607909 seconds
-	Average number of visits per object = 1.217608
-Retainer Profiling: 2, at 0.832874 seconds
-	Average number of visits per object = 1.217346
-Retainer Profiling: 3, at 1.194819 seconds
-	Average number of visits per object = 1.218147
-Retainer Profiling: 4, at 1.561762 seconds
-	Average number of visits per object = 1.218363
-Retainer Profiling: 5, at 1.958702 seconds
-	Average number of visits per object = 1.218531
-Retainer Profiling: 6, at 2.462626 seconds
-	Average number of visits per object = 1.221588
-Retainer Profiling: 7, at 2.906558 seconds
-	Average number of visits per object = 1.221263
-Retainer Profiling: 8, at 3.396484 seconds
-	Average number of visits per object = 1.221011
-Retainer Profiling: 9, at 3.947399 seconds
-	Average number of visits per object = 1.220717
-Retainer Profiling: 10, at 4.526312 seconds
-	Average number of visits per object = 1.220588
-Retainer Profiling: 11, at 5.140220 seconds
-	Average number of visits per object = 1.220640
-Retainer Profiling: 12, at 5.754126 seconds
-	Average number of visits per object = 1.220593
-Retainer Profiling: 13, at 6.419025 seconds
-	Average number of visits per object = 1.220674
-Retainer Profiling: 14, at 7.201905 seconds
-	Average number of visits per object = 1.315997
-Retainer Profiling: 15, at 8.116766 seconds
-	Average number of visits per object = 1.322943
-Retainer Profiling: 16, at 8.998631 seconds
-	Average number of visits per object = 1.318821
-Retainer Profiling: 17, at 9.825506 seconds
-	Average number of visits per object = 1.315847
-Retainer Profiling: 18, at 10.678376 seconds
-	Average number of visits per object = 1.312266
-Retainer Profiling: 19, at 11.571241 seconds
-	Average number of visits per object = 1.308597
-Retainer Profiling: 20, at 12.431110 seconds
-	Average number of visits per object = 1.299997
-Retainer Profiling: 21, at 13.252985 seconds
-	Average number of visits per object = 1.295243
-Retainer Profiling: 22, at 14.042866 seconds
-	Average number of visits per object = 1.290755
-Retainer Profiling: 23, at 14.815747 seconds
-	Average number of visits per object = 1.283331
-Retainer Profiling: 24, at 15.591629 seconds
-	Average number of visits per object = 1.276453
-Retainer Profiling: 25, at 16.336516 seconds
-	Average number of visits per object = 1.270391
-Retainer Profiling: 26, at 17.129395 seconds
-	Average number of visits per object = 1.264966
-Retainer Profiling: 27, at 17.873283 seconds
-	Average number of visits per object = 1.262035
-Retainer Profiling: 28, at 18.612171 seconds
-	Average number of visits per object = 1.259288
-Retainer Profiling: 29, at 19.350059 seconds
-	Average number of visits per object = 1.256661
-Retainer Profiling: 30, at 20.056950 seconds
-	Average number of visits per object = 1.254109
-Retainer Profiling: 31, at 20.791839 seconds
-	Average number of visits per object = 1.267934
-Retainer Profiling: 32, at 21.460737 seconds
-	Average number of visits per object = 1.540705
-Retainer Profiling: 33, at 22.404595 seconds
-	Average number of visits per object = 1.562991
-Retainer Profiling: 34, at 23.400444 seconds
-	Average number of visits per object = 1.598150
-Retainer Profiling: 35, at 24.270310 seconds
-	Average number of visits per object = 1.593103
-Retainer Profiling: 36, at 25.060191 seconds
-	Average number of visits per object = 1.606775
-Retainer Profiling: 37, at 26.355994 seconds
-	Average number of visits per object = 1.628678
-Retainer Profiling: 38, at 27.183868 seconds
-	Average number of visits per object = 1.626775
-Retainer Profiling: 39, at 28.467672 seconds
-	Average number of visits per object = 1.670678
-Retainer Profiling: 40, at 29.756476 seconds
-	Average number of visits per object = 1.662955
-Retainer Profiling: 41, at 31.302242 seconds
-	Average number of visits per object = 1.705935
-Retainer Profiling: 42, at 32.582048 seconds
-	Average number of visits per object = 1.698640
-Retainer Profiling: 43, at 33.835857 seconds
-	Average number of visits per object = 1.747319
-Retainer Profiling: 44, at 35.617585 seconds
-	Average number of visits per object = 1.739411
-Retainer Profiling: 45, at 36.741415 seconds
-	Average number of visits per object = 1.736833
-Retainer Profiling: 46, at 38.405161 seconds
-	Average number of visits per object = 1.781075
-Retainer Profiling: 47, at 40.128898 seconds
-	Average number of visits per object = 1.773889
-Retainer Profiling: 48, at 41.276724 seconds
-	Average number of visits per object = 1.812146
-Retainer Profiling: 49, at 44.099295 seconds
-	Average number of visits per object = 1.805011
-Retainer Profiling: 50, at 45.547075 seconds
-	Average number of visits per object = 1.852505
-Retainer Profiling: 51, at 48.131682 seconds
-	Average number of visits per object = 1.843237
-Retainer Profiling: 52, at 49.605457 seconds
-	Average number of visits per object = 1.877244
-Retainer Profiling: 53, at 52.402032 seconds
-	Average number of visits per object = 1.877623
-Retainer Profiling: 54, at 54.075778 seconds
-	Average number of visits per object = 1.871856
-Retainer Profiling: 55, at 55.406576 seconds
-	Average number of visits per object = 1.873545
-Retainer Profiling: 56, at 58.082169 seconds
-	Average number of visits per object = 1.912032
-Retainer Profiling: 57, at 60.368822 seconds
-	Average number of visits per object = 1.905715
-Retainer Profiling: 58, at 61.842597 seconds
-	Average number of visits per object = 1.902909
+	Tue Jun 15 17:34 2010 Time and Allocation Profiling Report  (Final)
 
-Retainer sets created during profiling:
-SET 2 = {<MAIN.SYSTEM>}
-SET 3 = {<BinaryGraph.CAF>}
-SET 4 = {<BinaryGraph.loadGraph,Main.main>}
-SET 13 = {<Data.Typeable.CAF>}
-SET 19 = {<GHC.IO.FD.CAF>}
-SET 30 = {<System.Posix.Internals.CAF>}
-SET 37 = {<Codec.Compression.Zlib.Internal.CAF>}
-SET 40 = {<Codec.Compression.Zlib.Internal.CAF>, <BinaryGraph.loadGraph,Main.main>}
-SET 41 = {<MAIN.SYSTEM>, <BinaryGraph.loadGraph,Main.main>}
-SET 42 = {<BinaryGraph.CAF>, <MAIN.SYSTEM>, <BinaryGraph.loadGraph,Main.main>}
-SET 43 = {<BinaryGraph.CAF>, <MAIN.SYSTEM>}
-SET 44 = {<GHC.IO.Handle.FD.CAF>}
-SET 45 = {<GHC.IO.Handle.FD.CAF>, <BinaryGraph.loadGraph,Main.main>}
-SET 52 = {<GHC.IO.Handle.FD.CAF>, <Data.Typeable.CAF>, <BinaryGraph.loadGraph,Main.main>}
-SET 62 = {<Main.main>}
-SET 63 = {<MAIN.SYSTEM>, <Main.main>}
-SET 64 = {<GHC.IO.Handle.FD.CAF>, <MAIN.SYSTEM>, <BinaryGraph.loadGraph,Main.main>}
-SET 69 = {<GHC.IO.Handle.FD.CAF>, <MAIN.SYSTEM>}
-SET 73 = {<GHC.IO.Handle.FD.CAF>, <Data.Typeable.CAF>, <MAIN.SYSTEM>, <BinaryGraph.loadGraph,Main.main>}
-SET 74 = {<GHC.Conc.CAF>}
-SET 77 = {<>}
-SET 83 = {<GHC.Conc.CAF>, <>}
-SET 92 = {<GHC.Exception.CAF>, <GHC.IO.Exception.CAF>, <GHC.TopHandler.CAF>, <Control.Exception.Base.CAF>, <Data.Typeable.CAF>, <MAIN.SYSTEM>}
-SET 132 = {<GHC.IO.Handle.FD.CAF>, <Data.Typeable.CAF>, <MAIN.SYSTEM>}
-SET 141 = {<SocRun.dayRanges,SocRun.socRun,Main.main>}
-SET 147 = {<MAIN.SYSTEM>, <SocRun.dayRanges,SocRun.socRun,Main.main>}
-SET 148 = {<MAIN.SYSTEM>, <BinaryGraph.loadGraph,Main.main>, <SocRun.dayRanges,SocRun.socRun,Main.main>}
-SET 149 = {<BinaryGraph.CAF>, <MAIN.SYSTEM>, <SocRun.dayRanges,SocRun.socRun,Main.main>}
-SET 150 = {<MAIN.SYSTEM>, <SocRun.socRun,Main.main>}
-SET 151 = {<BinaryGraph.CAF>, <MAIN.SYSTEM>, <SocRun.socRun,Main.main>, <SocRun.dayRanges,SocRun.socRun,Main.main>}
-SET 152 = {<SocRun.socRun,Main.main>}
-SET 153 = {<MAIN.SYSTEM>, <SocRun.socRun,Main.main>, <SocRun.dayRanges,SocRun.socRun,Main.main>}
-SET 154 = {<MAIN.SYSTEM>, <BinaryGraph.loadGraph,Main.main>, <SocRun.socRun,Main.main>, <SocRun.dayRanges,SocRun.socRun,Main.main>}
-SET 157 = {<BinaryGraph.CAF>, <MAIN.SYSTEM>, <SocRun.socRun,Main.main>}
-SET 174 = {<BinaryGraph.saveGraph,Main.main>}
-SET 177 = {<MAIN.SYSTEM>, <BinaryGraph.saveGraph,Main.main>}
-SET 198 = {<GHC.IO.Handle.FD.CAF>, <BinaryGraph.saveGraph,Main.main>}
-SET 202 = {<GHC.IO.Handle.FD.CAF>, <MAIN.SYSTEM>, <BinaryGraph.saveGraph,Main.main>}
-SET 206 = {<GHC.IO.Handle.FD.CAF>, <Data.Typeable.CAF>, <MAIN.SYSTEM>, <BinaryGraph.saveGraph,Main.main>}
-SET 211 = {<GHC.IO.Handle.FD.CAF>, <BinaryGraph.loadGraph,Main.main>, <BinaryGraph.saveGraph,Main.main>}
-SET 213 = {<GHC.IO.Handle.FD.CAF>, <MAIN.SYSTEM>, <BinaryGraph.loadGraph,Main.main>, <BinaryGraph.saveGraph,Main.main>}
-SET 217 = {<GHC.IO.Handle.FD.CAF>, <Data.Typeable.CAF>, <MAIN.SYSTEM>, <BinaryGraph.loadGraph,Main.main>, <BinaryGraph.saveGraph,Main.main>}
-SET 218 = {<Main.main>, <BinaryGraph.loadGraph,Main.main>}
-SET 219 = {<MAIN.SYSTEM>, <Main.main>, <BinaryGraph.saveGraph,Main.main>}
-SET 226 = {<MAIN.SYSTEM>, <BinaryGraph.loadGraph,Main.main>, <SocRun.socRun,Main.main>}
-SET 236 = {<SocRun.paramSC,SocRun.socRun,Main.main>}
-SET 244 = {<SocRun.socDay,SocRun.socRun,Main.main>}
-SET 245 = {<MAIN.SYSTEM>, <SocRun.socDay,SocRun.socRun,Main.main>}
-SET 248 = {<SocRun.socRun,Main.main>, <SocRun.socDay,SocRun.socRun,Main.main>}
-SET 250 = {<MAIN.SYSTEM>, <SocRun.socRun,Main.main>, <SocRun.socDay,SocRun.socRun,Main.main>}
-SET 251 = {<BinaryGraph.CAF>, <MAIN.SYSTEM>, <SocRun.socRun,Main.main>, <SocRun.socDay,SocRun.socRun,Main.main>}
-SET 252 = {<MAIN.SYSTEM>, <BinaryGraph.loadGraph,Main.main>, <SocRun.socDay,SocRun.socRun,Main.main>}
-SET 255 = {<SocRun.socUserDaySum,SocRun.socDay,SocRun.socRun,Main.main>}
-SET 256 = {<SocRun.socDay,SocRun.socRun,Main.main>, <SocRun.socUserDaySum,SocRun.socDay,SocRun.socRun,Main.main>}
-SET 259 = {<MAIN.SYSTEM>, <SocRun.socDay,SocRun.socRun,Main.main>, <SocRun.socUserDaySum,SocRun.socDay,SocRun.socRun,Main.main>}
-SET 260 = {<MAIN.SYSTEM>, <BinaryGraph.loadGraph,Main.main>, <SocRun.socRun,Main.main>, <SocRun.socDay,SocRun.socRun,Main.main>}
-SET 261 = {<MAIN.SYSTEM>, <BinaryGraph.loadGraph,Main.main>, <SocRun.socRun,Main.main>, <SocRun.socDay,SocRun.socRun,Main.main>, <SocRun.socUserDaySum,SocRun.socDay,SocRun.socRun,Main.main>}
-SET 262 = {<BinaryGraph.CAF>, <MAIN.SYSTEM>, <SocRun.socRun,Main.main>, <SocRun.socDay,SocRun.socRun,Main.main>, <SocRun.socUserDaySum,SocRun.socDay,SocRun.socRun,Main.main>}
+	   scProf +RTS -A5G -K1G -P -RTS ../tokyo/dreps100K.bin.zip ../tokyo/dments100K.bin.zip daps100K.bin.zip
+
+	total time  =       56.24 secs   (2812 ticks @ 20 ms)
+	total alloc = 14,832,723,880 bytes  (excludes profiling overheads)
+
+COST CENTRE                    MODULE               %time %alloc  ticks     bytes
+
+socDay                         SocRun                48.0   59.5   1349 1103578467
+socUserDaySum                  SocRun                20.3   15.9    570 293947485
+getUserDay                     SocRun                14.7    2.4    412  44434370
+socRun                         SocRun                 5.0    4.6    141  85671094
+loadGraph                      BinaryGraph            3.3    5.4     93  99748803
+CAF                            BinaryGraph            3.1    5.2     88  96306143
+saveGraph                      BinaryGraph            3.0    4.2     83  78355003
+dayRanges                      SocRun                 1.2    2.1     34  38248524
+
+
+                                                                                               individual    inherited
+COST CENTRE              MODULE                                               no.    entries  %time %alloc   %time %alloc  ticks     bytes
+
+MAIN                     MAIN                                                   1           0   0.0    0.0   100.0  100.0      0       672
+ main                    Main                                                 374           7   0.0    0.0    96.9   94.8      0     12320
+  socRun                 SocRun                                               379           3   5.0    4.6    90.6   85.2    141 685364064
+   socDay                SocRun                                               389      143577  48.0   59.5    84.4   78.4   1349 8828627736
+    safeDivide3          SocRun                                               395     2744516   0.4    0.4     0.5    0.6     10  54890320
+     safeDivide          SocRun                                               396     2058387   0.1    0.2     0.1    0.2      3  32274848
+    socUS                SocRun                                               394     3305894   0.6    0.0     0.6    0.0     18         0
+    socUserDaySum        SocRun                                               390     3305894  20.3   15.9    35.3   18.3    570 2351579880
+     getSoccap           SocRun                                               393      561734   0.4    0.0     0.4    0.0     10    749584
+     getUserDay          SocRun                                               392     6611788  14.7    2.4    14.7    2.4    412 355474960
+   newUserStats          SocRun                                               388          35   0.0    0.0     0.0    0.0      0      3080
+    emptyTalk            SocRun                                               391         139   0.0    0.0     0.0    0.0      0      2240
+   ustatsSG              SocRun                                               387          35   0.0    0.0     0.0    0.0      0         0
+   paramSC               SocRun                                               386           1   0.0    0.0     0.0    0.0      0        56
+   socInitSR             SocRun                                               385           0   0.0    0.0     0.0    0.0      0        24
+   maxDaysSR             SocRun                                               384           1   0.0    0.0     0.0    0.0      0         0
+   minMax2               SocRun                                               383       56458   0.0    0.0     0.0    0.0      0   1354992
+   dayRanges             SocRun                                               381     1049966   1.2    2.1     1.2    2.2     34 305988192
+    minMax1              SocRun                                               382      849964   0.0    0.1     0.0    0.1      1  20399136
+  saveGraph              BinaryGraph                                          378           1   3.0    4.2     3.0    4.2     83 626840024
+  loadGraph              BinaryGraph                                          377           4   3.3    5.4     3.3    5.4     93 797990424
+  eprintln               Main                                                 375           4   0.0    0.0     0.0    0.0      0    654328
+ CAF                     Main                                                 368           8   0.0    0.0     0.0    0.0      0       128
+  main                   Main                                                 376           0   0.0    0.0     0.0    0.0      0      6896
+ CAF                     Data.Typeable                                        366           1   0.0    0.0     0.0    0.0      0       568
+ CAF                     GHC.IO.Handle.FD                                     306           2   0.0    0.0     0.0    0.0      0     29216
+ CAF                     System.Posix.Internals                               305           7   0.0    0.0     0.0    0.0      0       328
+ CAF                     GHC.IO.FD                                            290           8   0.0    0.0     0.0    0.0      0      1456
+ CAF                     GHC.Conc                                             289           1   0.0    0.0     0.0    0.0      0       696
+ CAF                     GHC.IO.Handle.Internals                              280           1   0.0    0.0     0.0    0.0      0        32
+ CAF                     GHC.IO.Encoding.Iconv                                274           5   0.0    0.0     0.0    0.0      0      1848
+ CAF                     SocRun                                               271           5   0.0    0.0     0.0    0.0      0        80
+  socRun                 SocRun                                               380           0   0.0    0.0     0.0    0.0      0      4688
+ CAF                     Debug.Trace                                          245           1   0.0    0.0     0.0    0.0      0       248
+ CAF                     BinaryGraph                                          243           3   3.1    5.2     3.1    5.2     88 770449144
+ CAF                     Codec.Compression.Zlib.Internal                      241           2   0.0    0.0     0.0    0.0      0     17872
+ CAF                     Codec.Compression.Zlib.Stream                        240           1   0.0    0.0     0.0    0.0      0       392
+ CAF                     System.Environment                                   201           2   0.0    0.0     0.0    0.0      0      3408
