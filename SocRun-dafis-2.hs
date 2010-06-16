@@ -153,9 +153,8 @@ socDay sgraph params day =
     -- norms = foldl1' (zipWith (+)) sumTerms
     norms@(!a,!b,!c) = {-# SCC "norms" #-} foldl1' (\(!x,!y,!z) (!x',!y',!z') -> (x+x',y+y',z+z')) sumTerms
 
-    tick user _ = {-# SCC "socDay.tick" #-}
+    tick user _ (numers,!stats) = {-# SCC "socDay.tick" #-}
       let
-        (numers,!stats) = termsStats ! user
         !soc = socUS stats
         !soc' =
           case numers of
@@ -172,7 +171,7 @@ socDay sgraph params day =
         in
         stats'
 
-    !ustats' = {-# SCC "ustats'" #-} M.mapWithKey tick ustats
+    !ustats' = {-# SCC "ustats'" #-} M.intersectionWithKey tick ustats termsStats
 
     -- TODO fold[l/r]WithKey?
     !dcaps' = {-# SCC "dcaps'" #-} M.foldWithKey updateUser dcaps ustats'
