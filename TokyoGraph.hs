@@ -1,12 +1,13 @@
 module TokyoGraph (fetchGraph) where
   
 import Database.TokyoCabinet
+import IntBS
 import Graph
 import JSON2Graph
 import Control.Monad.Trans -- liftIO
 import System.IO
 
-fetchGraph :: FilePath -> Maybe Int -> Maybe Int -> TCM Graph    
+fetchGraph :: FilePath -> Maybe Int -> Maybe Int -> TCM (IntBS,Graph)
 fetchGraph fileName maxElems progress = do
       tc <- new :: TCM HDB -- alternatively you can use BDB or FDB
       open tc fileName [OREADER]
@@ -26,11 +27,7 @@ fetchGraph fileName maxElems progress = do
                           _ -> return ())
                 v <- get tc key
                 case v of
-                  -- somehow things come back quote-escaped and quoted out of tokyo,
-                  -- it's either clojure putting it or haskell getting it;
-                  -- for now quickly unescape quotes and remove the enclosing ones
-                  Just val -> -- let raw = B.filter (/='\\') . B.init . B.tail $ val in
-                    collect maxElems tc (succ count) ((key,val):acc)
+                  Just val -> collect maxElems tc (succ count) ((key,val):acc)
                   _ -> error "iternext has a key without a val"
               _ -> return (json2graph (reverse acc))
    

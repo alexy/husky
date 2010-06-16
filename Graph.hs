@@ -6,11 +6,14 @@ module Graph (
   , Reps
 ) where
 
-import qualified Data.Map as M
-import qualified Data.ByteString.Char8 as B
+import IntBS (IntBS)
+import Data.IntMap (IntMap)
 
-type Graph = M.Map User AdjList
-type AdjList = M.Map Day Reps      
-type User = B.ByteString
-type Day = Int
-type Reps = M.Map User Int
+type User     = Int
+type Reps     = IntMap Int
+type Graph    = IntMap AdjList
+type AdjList  = IntMap Reps
+type Day      = Int
+      
+        
+      
