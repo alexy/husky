@@ -1,5 +1,5 @@
 Twitter Graph in Haskell
-========================
+------------------------
 
 Haskell-Cafe patrons: head straight for [the Haskell vs Clojure making-it-just-work and then -better challenge!](husky/blob/master/Haskell-vs-Clojure-Twitter.md)
 
@@ -14,7 +14,7 @@ Once we build the graph in memory, we dump it with `Data.Binary` and then load t
 The program was sped up greatly with `+RTS -A10G`, otherwise was crawling for hours.  Now the read is done in seconds, and a full run with dump in 11 minutes.  Clojure does simple JSON read in an hour at least, but protobufs in 3 minutes.  We'll speed up Jackson read with explicit field by field map-building though.
 
 RUNNING
--------
+=======
 
 	ghc --make -O2 sc.hs
 	
@@ -23,7 +23,7 @@ RUNNING
 I've added the `-A` and `-K` sizes which did the job; perhaps lower levels would work with the full data, and surely would with the samples.  The samples are 100,000 users each, vs. 3.5 million for the originals (to be uploaded at a later date).
 
 ACKNOWLEDGEMENTS
-----------------
+================
 
 This is the 3rd time I've taken up Haskell, and it worked.  I thank the great `#haskell` channel on Freenode.  @dafis provided a bangified version of `SocRun.hs`, to which I added a couple more bangs.  I wonder which ones are unnecessary?
 
