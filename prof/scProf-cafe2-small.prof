@@ -1,0 +1,60 @@
+	Tue Jun 15 17:34 2010 Time and Allocation Profiling Report  (Final)
+
+	   scProf +RTS -A5G -K1G -P -RTS ../tokyo/dreps100K.bin.zip ../tokyo/dments100K.bin.zip daps100K.bin.zip
+
+	total time  =       56.24 secs   (2812 ticks @ 20 ms)
+	total alloc = 14,832,723,880 bytes  (excludes profiling overheads)
+
+COST CENTRE                    MODULE               %time %alloc  ticks     bytes
+
+socDay                         SocRun                48.0   59.5   1349 1103578467
+socUserDaySum                  SocRun                20.3   15.9    570 293947485
+getUserDay                     SocRun                14.7    2.4    412  44434370
+socRun                         SocRun                 5.0    4.6    141  85671094
+loadGraph                      BinaryGraph            3.3    5.4     93  99748803
+CAF                            BinaryGraph            3.1    5.2     88  96306143
+saveGraph                      BinaryGraph            3.0    4.2     83  78355003
+dayRanges                      SocRun                 1.2    2.1     34  38248524
+
+
+                                                                                               individual    inherited
+COST CENTRE              MODULE                                               no.    entries  %time %alloc   %time %alloc  ticks     bytes
+
+MAIN                     MAIN                                                   1           0   0.0    0.0   100.0  100.0      0       672
+ main                    Main                                                 374           7   0.0    0.0    96.9   94.8      0     12320
+  socRun                 SocRun                                               379           3   5.0    4.6    90.6   85.2    141 685364064
+   socDay                SocRun                                               389      143577  48.0   59.5    84.4   78.4   1349 8828627736
+    safeDivide3          SocRun                                               395     2744516   0.4    0.4     0.5    0.6     10  54890320
+     safeDivide          SocRun                                               396     2058387   0.1    0.2     0.1    0.2      3  32274848
+    socUS                SocRun                                               394     3305894   0.6    0.0     0.6    0.0     18         0
+    socUserDaySum        SocRun                                               390     3305894  20.3   15.9    35.3   18.3    570 2351579880
+     getSoccap           SocRun                                               393      561734   0.4    0.0     0.4    0.0     10    749584
+     getUserDay          SocRun                                               392     6611788  14.7    2.4    14.7    2.4    412 355474960
+   newUserStats          SocRun                                               388          35   0.0    0.0     0.0    0.0      0      3080
+    emptyTalk            SocRun                                               391         139   0.0    0.0     0.0    0.0      0      2240
+   ustatsSG              SocRun                                               387          35   0.0    0.0     0.0    0.0      0         0
+   paramSC               SocRun                                               386           1   0.0    0.0     0.0    0.0      0        56
+   socInitSR             SocRun                                               385           0   0.0    0.0     0.0    0.0      0        24
+   maxDaysSR             SocRun                                               384           1   0.0    0.0     0.0    0.0      0         0
+   minMax2               SocRun                                               383       56458   0.0    0.0     0.0    0.0      0   1354992
+   dayRanges             SocRun                                               381     1049966   1.2    2.1     1.2    2.2     34 305988192
+    minMax1              SocRun                                               382      849964   0.0    0.1     0.0    0.1      1  20399136
+  saveGraph              BinaryGraph                                          378           1   3.0    4.2     3.0    4.2     83 626840024
+  loadGraph              BinaryGraph                                          377           4   3.3    5.4     3.3    5.4     93 797990424
+  eprintln               Main                                                 375           4   0.0    0.0     0.0    0.0      0    654328
+ CAF                     Main                                                 368           8   0.0    0.0     0.0    0.0      0       128
+  main                   Main                                                 376           0   0.0    0.0     0.0    0.0      0      6896
+ CAF                     Data.Typeable                                        366           1   0.0    0.0     0.0    0.0      0       568
+ CAF                     GHC.IO.Handle.FD                                     306           2   0.0    0.0     0.0    0.0      0     29216
+ CAF                     System.Posix.Internals                               305           7   0.0    0.0     0.0    0.0      0       328
+ CAF                     GHC.IO.FD                                            290           8   0.0    0.0     0.0    0.0      0      1456
+ CAF                     GHC.Conc                                             289           1   0.0    0.0     0.0    0.0      0       696
+ CAF                     GHC.IO.Handle.Internals                              280           1   0.0    0.0     0.0    0.0      0        32
+ CAF                     GHC.IO.Encoding.Iconv                                274           5   0.0    0.0     0.0    0.0      0      1848
+ CAF                     SocRun                                               271           5   0.0    0.0     0.0    0.0      0        80
+  socRun                 SocRun                                               380           0   0.0    0.0     0.0    0.0      0      4688
+ CAF                     Debug.Trace                                          245           1   0.0    0.0     0.0    0.0      0       248
+ CAF                     BinaryGraph                                          243           3   3.1    5.2     3.1    5.2     88 770449144
+ CAF                     Codec.Compression.Zlib.Internal                      241           2   0.0    0.0     0.0    0.0      0     17872
+ CAF                     Codec.Compression.Zlib.Stream                        240           1   0.0    0.0     0.0    0.0      0       392
+ CAF                     System.Environment                                   201           2   0.0    0.0     0.0    0.0      0      3408
