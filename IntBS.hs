@@ -14,6 +14,7 @@ import qualified Data.ByteString.Char8 as B
 import Data.ByteString.Char8 (ByteString)
 import Data.Binary
 import Control.Monad (liftM3)
+import BinaryGraph
 
 data IntBS = IntBS { trieIB :: Trie Int, totalIB :: Int, backIB :: IntMap ByteString }
 empty = IntBS T.empty 0 M.empty
@@ -43,5 +44,5 @@ lookupInt :: IntBS -> Int -> Maybe ByteString
 lookupInt dic i =
   let m = backIB dic in
   M.lookup i m
-    
-             
+  
+save ib fileName = saveData (backIB ib) fileName

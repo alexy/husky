@@ -1,15 +1,17 @@
 module Main where
 
-import qualified Data.Map as M
+import qualified Data.IntMap as M
 import System (getArgs)
 import Graph
 import BinaryGraph
-import qualified Data.Map as M
 import System.IO
 
-takeFirst n m = let (k,_) = M.elemAt n m
-                    (res,_) = M.split k m 
-                in res
+-- IntMaqp has no elemAt
+-- takeFirst n m = let (k,_) = M.elemAt n m
+--                    (res,_) = M.split k m 
+--                in res
+
+takeFirst n m = M.fromList . take n . M.toAscList $ m
 
 main :: IO ()
 main = do
@@ -19,10 +21,10 @@ main = do
     hPutStrLn stderr ("downsizing " ++ inFile ++ " to "
                     ++ show maxElems ++ " elements into "
                     ++ outFile)
-    g <- loadGraph inFile
+    g <- loadData inFile :: IO Graph
     let gSmall = if maxElems >= M.size g then 
                     error ("you want to downsize to more than the actual size, " 
                       ++ (show . M.size $ g) ++ " elements present")
                   else 
                     takeFirst maxElems g
-    saveGraph gSmall outFile
+    saveData gSmall outFile

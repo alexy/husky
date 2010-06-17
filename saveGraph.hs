@@ -8,7 +8,7 @@ import qualified Data.ByteString.Lazy as BL
 import qualified Data.Binary as D
 import Codec.Compression.GZip
 import qualified IntBS as IB
-import IntBS (IntBS)
+import IntBS (IntBS,backIB)
 
 eprintln s = do hPutStrLn stderr s
                 hFlush stderr
@@ -31,12 +31,10 @@ main = do
           _ -> return IB.empty
   eprintln ("reading graph from cabinet: " ++ fileName
     ++ "\n  saving graph in " ++ graphFile ++ ", users in " ++ usersFile
-    ++ "\n  " ++ case users of {Just x -> "merging users from" ++ x; _ -> "virginal users"}
+    ++ "\n  " ++ case users of {Just x -> "merging users from " ++ x; _ -> "virginal users"}
     ++ "\n  maxElems: " ++ (show maxElems) ++ ", progress: " ++ (show progress))
-  -- (pack key) below for ByteString:
+
   (dic,graph) <- runTCM (fetchGraph fileName dic maxElems progress)
-  -- println . show $ graph
-  -- println (show . size $ graph)
   eprintln "well, let's save it now, shall we?"
   saveData graph graphFile
   saveData dic usersFile
