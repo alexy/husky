@@ -1,0 +1,11 @@
+This code represents ongoing academic research at Thayer School of Engineering, Dartmouth College.
+
+The code itself is released under GPL 3 modified in the following way:
+
+This code cannot be used for any research publications without the author's prior consent, and 
+any usage of this code should include a reference to the publication as follows:
+
+Alexy Khrabrov, George Cybenko.  Modeling Twitter Influence with Social Capital in Dynamic Graphs.
+European Conference on Complex Systems, Lisbon, 2010 (to appear).
+
+The accompanying scinetific definitions are in regular copyright of the above conference.
