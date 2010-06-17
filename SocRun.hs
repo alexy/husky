@@ -197,11 +197,17 @@ getUserDay user day m =
 -- we started writing this and BMeph finished, but Map has findWithDefault already:
 -- lookupWithDefault d = fromMaybe d . flip M.lookup
 
-getSoccap ustats user =
+getSocCap ustats user =
   case M.lookup user ustats of
     Just UserStats{socUS =soc} -> soc
     _ -> 0
 
+-- our strict version of M.foldWithKey
+-- the step function obeys the parent's param order
+foldWithKey' :: (Int -> a -> b -> b) -> b -> M.IntMap a -> b
+foldWithKey' f z m = foldl' step z (M.toList m)
+  where step res (k,v) = f k v res
+          
 socUserDaySum sgraph day user =
   let
     SGraph {drepsSG =dreps, dmentsSG =dments, ustatsSG =ustats} = sgraph
@@ -217,50 +223,46 @@ socUserDaySum sgraph day user =
       let
         UserStats {socUS =soc, dayUS =day, insUS =ins, outsUS =outs, totUS =tot, balUS =bal} = stats
 
-        -- changing order from foldlWithKey to foldWithKey's
-        -- to be able to run under GHC 6.10
-        socStep pred !to !num !res = {-# SCC "socStep" #-}
-          let !toBal = M.findWithDefault 0 to bal in
-          if not (pred toBal) then 0
-          else
-            let !toSoc = getSoccap ustats to in
-              if toSoc == 0 then 0
-              else
-                let
-                  toTot = M.findWithDefault 1 to tot
-                  !term = fromIntegral (num * toBal * toTot) * toSoc
-                  in
-                  res + term
-
         -- find all those who talked to us in the past to whom we replied now
         !outSum = {-# SCC "outSum" #-}
           case dr_ of
             Nothing -> 0
             Just dr ->
-              M.foldWithKey (socStep (<0)) 0 dr
-
-
-        !inSumBack = {-# SCC "inSumBack" #-}
-          case dm_ of
-            Nothing -> 0
-            Just dm ->
-              M.foldWithKey (socStep (>0)) 0 dm
-
-        !inSumAll = {-# SCC "inSumAll" #-}
-          case dm_ of
-            Nothing -> 0
-            Just dm ->
-              M.foldWithKey step 0 dm
+              foldWithKey' step 0 dr
               where
-                step to !num !res =
-                  let toSoc = getSoccap ustats to in
-                    if toSoc == 0 then 0
+                 step !to !num !res = {-# SCC "outStep" #-}
+                  let !toBal = M.findWithDefault 0 to bal in
+                  if toBal >= 0 then 0
+                  else
+                    let !toSoc = getSocCap ustats to in
+                      if toSoc == 0 then 0
+                      else
+                        let
+                          toTot = M.findWithDefault 1 to tot
+                          !term = fromIntegral (num * toBal * toTot) * toSoc
+                          in
+                          res + term
+               
+
+        (!inSumBack,!inSumAll) = {-# SCC "inSumBack" #-}
+          case dm_ of
+            Nothing -> (0,0)
+            Just dm ->
+              foldWithKey' step (0,0) dm
+              where
+                 step !to !num (!backSum,!allSum) = {-# SCC "inStep" #-}
+                  let 
+                    !toBal = M.findWithDefault 0 to bal
+                    !toSoc = getSocCap ustats to in
+                    if toSoc == 0 then (0,0)
                     else
                       let
                         toTot = M.findWithDefault 1 to tot
-                        !term = fromIntegral (num * toTot) * toSoc
+                        !backTerm = fromIntegral (num * toBal * toTot) * toSoc
+                        !allTerm  = fromIntegral (num * toTot) * toSoc
                         in
-                        res + term
+                        (backSum + backTerm,allSum + allTerm)
+
 
         terms = (outSum, inSumBack, inSumAll)
 
