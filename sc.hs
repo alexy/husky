@@ -17,12 +17,12 @@ main = do
   	", saving dcaps in " ++ saveName)
   let maxDays :: Maybe Int 
       maxDays = listToMaybe . map read $ restArgs
-  dreps <- loadGraph drepsName
+  dreps <- loadData drepsName
   eprintln ("loaded " ++ drepsName ++ ", " ++ (show . M.size $ dreps))
-  dments <- loadGraph dmentsName
+  dments <- loadData dmentsName
   eprintln ("loaded " ++ dmentsName ++ ", " ++ (show . M.size $ dments))
   
   let SGraph{dcapsSG =dcaps} = socRun dreps dments optSocRun {maxDaysSR= maxDays}
   eprintln ("computed sgraph, now saving dcaps in " ++ saveName)
   -- printGraph dcaps
-  saveGraph dcaps saveName
+  saveData dcaps saveName
