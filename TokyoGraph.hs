@@ -7,8 +7,8 @@ import JSON2Graph
 import Control.Monad.Trans -- liftIO
 import System.IO
 
-fetchGraph :: FilePath -> Maybe Int -> Maybe Int -> TCM (IntBS,Graph)
-fetchGraph fileName maxElems progress = do
+fetchGraph :: FilePath -> IntBS -> Maybe Int -> Maybe Int -> TCM (IntBS,Graph)
+fetchGraph fileName dic maxElems progress = do
       tc <- new :: TCM HDB -- alternatively you can use BDB or FDB
       open tc fileName [OREADER]
       iterinit tc
@@ -29,5 +29,5 @@ fetchGraph fileName maxElems progress = do
                 case v of
                   Just val -> collect maxElems tc (succ count) ((key,val):acc)
                   _ -> error "iternext has a key without a val"
-              _ -> return (json2graph (reverse acc))
+              _ -> return (json2graph dic (reverse acc))
    

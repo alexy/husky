@@ -15,8 +15,8 @@ import Data.Ord (comparing)
 import Data.List (groupBy,sortBy,foldl1')
 import Data.Foldable (foldl')
 import Data.Function (on)
-import qualified Data.Map as M
-import Data.Map ((!))
+import qualified Data.IntMap as M
+import Data.IntMap ((!))
 import Data.List (maximum)
 import System.IO
 import Debug.Trace
@@ -29,8 +29,8 @@ import Control.Monad ((>=>))
 --   hPrint stderr x
 --   hFlush stderr
 
-type DCaps = M.Map User (M.Map Day Float)
-type TalkBalance = M.Map User Int
+type DCaps = M.IntMap (M.IntMap Float)
+type TalkBalance = M.IntMap Int
 
 emptyTalk :: TalkBalance
 emptyTalk = M.empty
@@ -47,7 +47,7 @@ newUserStats :: Float -> Int -> UserStats
 newUserStats soc day = UserStats {socUS = soc, dayUS = day,
   insUS = emptyTalk, outsUS = emptyTalk, totUS = emptyTalk, balUS = emptyTalk}
 
-type UStats = M.Map User UserStats
+type UStats = M.IntMap UserStats
 data SocRun = SocRun {alphaSR :: !Float, betaSR :: !Float, gammaSR :: !Float,
                       socInitSR :: !Float, maxDaysSR :: Maybe Int}
 optSocRun = SocRun 0.00001 0.5 0.5 1.0 Nothing
@@ -70,7 +70,7 @@ minMax2 (oldMin, oldMax) (x,y) =
 -- PRE: dreps must be sorted in adjacency lists by day!"
 -- (assert (reps-sorted1? dreps))
 
-dayRanges :: Graph -> M.Map User (Int, Int)
+dayRanges :: Graph -> M.IntMap (Int, Int)
 dayRanges dreps = M.map doDays dreps
   where
     doDays days = case fst $ M.findMin days of
@@ -94,7 +94,9 @@ socRun dreps dments opts =
       presMap = M.unionWith minMax2 (dayRanges dreps) (dayRanges dments)
       !l0 = snd . snd $ M.findMax presMap
       (!lastDay0, !dstarts) = foldl' updt (l0, M.empty) (M.assocs presMap)
-      updt (!ld, !m) (u,(f,l)) = (max ld l, M.insertWith' (++) f [u] m)
+      -- Data.Map has insertWith' which we used below, but Data.IntMap doesn't:
+      -- updt (!ld, !m) (u,(f,l)) = (max ld l, M.insertWith' (++) f [u] m)
+      updt (!ld, !m) (u,(f,l)) = (max ld l, M.insertWith (++) f [u] m)
       !firstDay = fst $ M.findMin dstarts
       !lastDay  = let x' = maybe lastDay0 (\y -> min lastDay0 (firstDay + y - 1)) (maxDaysSR opts)
       			      in
@@ -179,7 +181,8 @@ socDay sgraph params day =
       where
         updateUser !user userStats !res =
           case (dayUS userStats, socUS userStats) of
-            (!day, !soc) -> M.insertWith' (flip M.union) user (M.singleton day soc) res
+            -- IntMap has no insertWith', so we revert to insertWith:
+            (!day, !soc) -> M.insertWith (flip M.union) user (M.singleton day soc) res
     in
     sgraph {ustatsSG= ustats', dcapsSG= dcaps'}
 

@@ -48,10 +48,10 @@ json2num :: JSON -> Int
 json2num (Number x) = fromIntegral . R.numerator $ x
 json2num _ = error "bad j2num"
 
-json2graph :: [(ByteString,ByteString)] -> (IntBS,Graph)
-json2graph us = (dic',g)
+json2graph :: IntBS -> [(ByteString,ByteString)] -> (IntBS,Graph)
+json2graph dic0 js = (dic2,g)
   where
-    (users,adjs)  = unzip us
-    (dic,users') = mapAccumL IB.insert IB.empty users
-    (dic',adjs')  = mapAccumL json2AdjList dic adjs
+    (users,adjs)  = unzip js
+    (dic1,users') = mapAccumL IB.insert dic0 users
+    (dic2,adjs')  = mapAccumL json2AdjList dic1 adjs
     g = M.fromList (zip users' adjs')
