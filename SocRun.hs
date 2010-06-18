@@ -13,11 +13,12 @@ where
 import Graph
 import Data.Ord (comparing)
 import Data.List (groupBy,sortBy,foldl1')
-import Data.Foldable (foldl')
 import Data.Function (on)
 import qualified Data.IntMap as M
 import Data.IntMap ((!))
-import Data.List (maximum)
+-- is there a difference between foldl' from Foldable or List?
+-- import Data.Foldable (foldl')
+import Data.List (maximum,foldl')
 import System.IO
 import Debug.Trace
 import Data.Maybe
