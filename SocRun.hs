@@ -189,9 +189,9 @@ socDay sgraph params day =
     in
     sgraph {ustatsSG= ustats', dcapsSG= dcaps'}
 
--- socUserDaySum sgraph day user = undefined
 
---getUserDay user day = M.lookup user >=> M.lookup day
+-- ddarius checked this is as fast as the handmade below:
+-- getUserDay user day = M.lookup user >=> M.lookup day
 {-# INLINE getUserDay #-}
 getUserDay user day m =
       case {-# SCC "getUserDay.user" #-} M.lookup user m of
@@ -236,16 +236,16 @@ socUserDaySum sgraph day user =
               where
                  step !to !num !res = {-# SCC "outStep" #-}
                   let !toBal = M.findWithDefault 0 to bal in
-                  if toBal >= 0 then 0
+                  if toBal >= 0 then res
                   else
                     let !toSoc = getSocCap ustats to in
-                      if toSoc == 0 then 0
+                      if toSoc == 0 then res
                       else
                         let
                           toTot = M.findWithDefault 1 to tot
                           !term = fromIntegral (num * toBal * toTot) * toSoc
                           in
-                          res + term
+                          res - term -- equivalent to sum of abs terms
                
 
         (!inSumBack,!inSumAll) = {-# SCC "inSumBack" #-}
@@ -254,14 +254,14 @@ socUserDaySum sgraph day user =
             Just dm ->
               foldWithKey' step (0,0) dm
               where
-                 step !to !num (!backSum,!allSum) = {-# SCC "inStep" #-}
+                 step !to !num res@(!backSum,!allSum) = {-# SCC "inStep" #-}
                   let 
                     !toBal = M.findWithDefault 0 to bal
                     !toSoc = getSocCap ustats to in
-                    if toSoc == 0 then (0,0)
+                    if toSoc == 0 then res
                     else
                       let
-                        toTot = M.findWithDefault 1 to tot
+                        !toTot = M.findWithDefault 1 to tot
                         !allTerm  = fromIntegral (num * toTot) * toSoc
                         -- TODO: corrected by iffing cases
                         !backTerm = if toBal <= 0 then 0 else fromIntegral toBal * allTerm
@@ -271,20 +271,24 @@ socUserDaySum sgraph day user =
 
         terms = (outSum, inSumBack, inSumAll)
 
-        addMaps      = M.unionWith (+)
-        subtractMaps = M.unionWith (-)
+        addMaps       = M.unionWith (+)
+        addsMaps      = M.unionsWith (+)
+        negateMap     = M.map negate
+        -- this is buggy, as uncovered in OCaml -- missing key in first adds positive from second
+        -- in OCaml, replaced by hashMergeWithDef, so the op is supplied the left operand, e.g. 0
+        -- subtractMaps = M.unionWith (-)
 
-        ins'  = case dr_ of {Just dr -> addMaps ins dr;  _ -> ins}
+        ins'  = case dr_ of {Just dr -> addMaps ins  dr;  _ -> ins}
         outs' = case dm_ of {Just dm -> addMaps outs dm; _ -> outs}
 
         -- ziman: M.unionWith (+) `on` maybe M.empty id
         (tot', bal')  =
           case (dr_, dm_) of
             (Just dr, Nothing) -> (addMaps tot dr, addMaps bal dr)
-            (Nothing, Just dm) -> (addMaps tot dm, subtractMaps bal dm)
+            (Nothing, Just dm) -> (addMaps tot dm, addMaps bal (negateMap dm))
             (Just dr, Just dm) ->
-              let t = addMaps dr $ addMaps tot dm
-                  b = addMaps dr $ subtractMaps bal dm
+              let t = addsMaps [tot, dr, dm]
+                  b = addsMaps [bal, dr, negateMap dm]
               in
               (t,b)
 
