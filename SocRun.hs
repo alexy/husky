@@ -125,7 +125,7 @@ socRun dreps dments opts =
 -- socDay sgraph params day = undefined
 
 safeDivide :: (Fractional a) => a -> a -> a
-safeDivide x 0 = x
+safeDivide x 0 = 0 -- or x; interesting differences in soccap
 safeDivide x y = x / y
 
 -- fst3 (x,_,_) = x
@@ -260,7 +260,6 @@ socUserDaySum sgraph day user =
               where
                  step !to !num res@(!backSum,!allSum) = {-# SCC "inStep" #-}
                   let 
-                    !toBal = M.findWithDefault 0 to bal
                     !toSoc = getSocCap ustats to in
                     if toSoc == 0 then res
                     else
@@ -268,7 +267,7 @@ socUserDaySum sgraph day user =
                         !toIn  = M.findWithDefault 1 to ins
                         !toTot = M.findWithDefault 1 to tot
                         !allTerm  = fromIntegral (num * toIn * toTot) * toSoc
-                        -- TODO: corrected by iffing cases
+                        !toBal = M.findWithDefault 0 to bal
                         !backTerm = if toBal <= 0 then 0 else fromIntegral toBal * allTerm
                         in
                         (backSum + backTerm,allSum + allTerm)
