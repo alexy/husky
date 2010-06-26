@@ -154,7 +154,10 @@ socDay sgraph params day =
     sumTerms   = catMaybes . map fst . M.elems $ termsStats
 
     -- norms = foldl1' (zipWith (+)) sumTerms
-    norms@(!a,!b,!c) = {-# SCC "norms" #-} foldl1' (\(!x,!y,!z) (!x',!y',!z') -> (x+x',y+y',z+z')) sumTerms
+    norms@(!a,!b,!c) = {-# SCC "norms" #-}
+      let res@(!a,!b,!c) = foldl1' (\(!x,!y,!z) (!x',!y',!z') -> (x+x',y+y',z+z')) sumTerms 
+      in trace ("day " ++ (show day) ++ " norms: [" ++ (show a) ++ ", " ++ (show b) ++ ", " ++ (show c) ++ "]")
+         res
 
     tick (!numers,!stats) = {-# SCC "socDay.tick" #-}
       let
