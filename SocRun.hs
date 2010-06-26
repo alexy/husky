@@ -30,7 +30,7 @@ import Control.Monad ((>=>))
 --   hPrint stderr x
 --   hFlush stderr
 
-type DCaps = M.IntMap (M.IntMap Float)
+type DCaps = M.IntMap [(Int,Float)]
 type TalkBalance = M.IntMap Int
 
 emptyTalk :: TalkBalance
@@ -179,13 +179,16 @@ socDay sgraph params day =
     !ustats' = {-# SCC "ustats'" #-} M.map tick termsStats
 
     -- TODO: @dafis strictified this, but the logic needs checking
-    !dcaps' = {-# SCC "dcaps'" #-} M.foldWithKey updateUser dcaps ustats'
+    !dcaps' = {-# SCC "dcaps'" #-} foldWithKey' updateUser dcaps ustats'
       where
         updateUser !user !stats !res =
           case socUS stats of
             -- IntMap has no insertWith', so we revert to insertWith:
             -- TODO just keep it as a list and append instead of maps:
-            !soc -> M.insertWith (flip M.union) user (M.singleton day soc) res
+            !soc -> M.alter addDay user res
+              where addDay Nothing   = Just [(day,soc)]
+                    addDay (Just ds) = Just ((day,soc):ds)
+                        
     in
     sgraph {ustatsSG= ustats', dcapsSG= dcaps'}
 
