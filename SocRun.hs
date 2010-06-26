@@ -13,11 +13,12 @@ where
 import Graph
 import Data.Ord (comparing)
 import Data.List (groupBy,sortBy,foldl1')
-import Data.Foldable (foldl')
 import Data.Function (on)
 import qualified Data.IntMap as M
 import Data.IntMap ((!))
-import Data.List (maximum)
+-- is there a difference between foldl' from Foldable or List?
+-- import Data.Foldable (foldl')
+import Data.List (maximum,foldl')
 import System.IO
 import Debug.Trace
 import Data.Maybe
@@ -155,7 +156,7 @@ socDay sgraph params day =
     -- norms = foldl1' (zipWith (+)) sumTerms
     norms@(!a,!b,!c) = {-# SCC "norms" #-} foldl1' (\(!x,!y,!z) (!x',!y',!z') -> (x+x',y+y',z+z')) sumTerms
 
-    tick user _ (!numers,!stats) = {-# SCC "socDay.tick" #-}
+    tick (!numers,!stats) = {-# SCC "socDay.tick" #-}
       let
         !soc = socUS stats
         !soc' =
@@ -173,21 +174,24 @@ socDay sgraph params day =
         in
         stats'
 
-    !ustats' = {-# SCC "ustats'" #-} M.intersectionWithKey tick ustats termsStats
+    -- TODO verify replacement of M.intersectionWithKey by just M.map,
+    -- and dropping the leading two parameters from tick above
+    !ustats' = {-# SCC "ustats'" #-} M.map tick termsStats
 
-    -- TODO fold[l/r]WithKey?
+    -- TODO: @dafis strictified this, but the logic needs checking
     !dcaps' = {-# SCC "dcaps'" #-} M.foldWithKey updateUser dcaps ustats'
       where
-        updateUser !user userStats !res =
-          case (dayUS userStats, socUS userStats) of
+        updateUser !user !stats !res =
+          case socUS stats of
             -- IntMap has no insertWith', so we revert to insertWith:
-            (!day, !soc) -> M.insertWith (flip M.union) user (M.singleton day soc) res
+            -- TODO just keep it as a list and append instead of maps:
+            !soc -> M.insertWith (flip M.union) user (M.singleton day soc) res
     in
     sgraph {ustatsSG= ustats', dcapsSG= dcaps'}
 
--- socUserDaySum sgraph day user = undefined
 
---getUserDay user day = M.lookup user >=> M.lookup day
+-- ddarius checked this is as fast as the handmade below:
+-- getUserDay user day = M.lookup user >=> M.lookup day
 {-# INLINE getUserDay #-}
 getUserDay user day m =
       case {-# SCC "getUserDay.user" #-} M.lookup user m of
@@ -232,16 +236,17 @@ socUserDaySum sgraph day user =
               where
                  step !to !num !res = {-# SCC "outStep" #-}
                   let !toBal = M.findWithDefault 0 to bal in
-                  if toBal >= 0 then 0
+                  if toBal >= 0 then res
                   else
                     let !toSoc = getSocCap ustats to in
-                      if toSoc == 0 then 0
+                      if toSoc == 0 then res
                       else
                         let
-                          toTot = M.findWithDefault 1 to tot
-                          !term = fromIntegral (num * toBal * toTot) * toSoc
+                          !toOut = M.findWithDefault 1 to outs
+                          !toTot = M.findWithDefault 1 to tot
+                          !term = fromIntegral (num * toOut * toBal * toTot) * toSoc
                           in
-                          res + term
+                          res - term -- equivalent to sum of abs terms
                
 
         (!inSumBack,!inSumAll) = {-# SCC "inSumBack" #-}
@@ -250,36 +255,42 @@ socUserDaySum sgraph day user =
             Just dm ->
               foldWithKey' step (0,0) dm
               where
-                 step !to !num (!backSum,!allSum) = {-# SCC "inStep" #-}
+                 step !to !num res@(!backSum,!allSum) = {-# SCC "inStep" #-}
                   let 
                     !toBal = M.findWithDefault 0 to bal
                     !toSoc = getSocCap ustats to in
-                    if toSoc == 0 then (0,0)
+                    if toSoc == 0 then res
                     else
                       let
-                        toTot = M.findWithDefault 1 to tot
-                        !backTerm = fromIntegral (num * toBal * toTot) * toSoc
-                        !allTerm  = fromIntegral (num * toTot) * toSoc
+                        !toIn  = M.findWithDefault 1 to ins
+                        !toTot = M.findWithDefault 1 to tot
+                        !allTerm  = fromIntegral (num * toIn * toTot) * toSoc
+                        -- TODO: corrected by iffing cases
+                        !backTerm = if toBal <= 0 then 0 else fromIntegral toBal * allTerm
                         in
                         (backSum + backTerm,allSum + allTerm)
 
 
         terms = (outSum, inSumBack, inSumAll)
 
-        addMaps      = M.unionWith (+)
-        subtractMaps = M.unionWith (-)
+        addMaps       = M.unionWith (+)
+        addsMaps      = M.unionsWith (+)
+        negateMap     = M.map negate
+        -- this is buggy, as uncovered in OCaml -- missing key in first adds positive from second
+        -- in OCaml, replaced by hashMergeWithDef, so the op is supplied the left operand, e.g. 0
+        -- subtractMaps = M.unionWith (-)
 
-        ins'  = case dr_ of {Just dr -> addMaps ins dr;  _ -> ins}
+        ins'  = case dr_ of {Just dr -> addMaps ins  dr;  _ -> ins}
         outs' = case dm_ of {Just dm -> addMaps outs dm; _ -> outs}
 
         -- ziman: M.unionWith (+) `on` maybe M.empty id
         (tot', bal')  =
           case (dr_, dm_) of
             (Just dr, Nothing) -> (addMaps tot dr, addMaps bal dr)
-            (Nothing, Just dm) -> (addMaps tot dm, subtractMaps bal dm)
+            (Nothing, Just dm) -> (addMaps tot dm, addMaps bal (negateMap dm))
             (Just dr, Just dm) ->
-              let t = addMaps dr $ addMaps tot dm
-                  b = addMaps dr $ subtractMaps bal dm
+              let t = addsMaps [tot, dr, dm]
+                  b = addsMaps [bal, dr, negateMap dm]
               in
               (t,b)
 

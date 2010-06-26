@@ -89,11 +89,13 @@
             (let [to-tot (get tot to 1.)]
               (* num to-bal to-tot to-soc)))))))) sum) 0.)
               
-        in-sum-back (if dm (->> dm (map (fn [[from num]]
-          (let [from-bal (get bal from 0)] (if (<= from-bal 0) 0.
-            (let [from-soc (get-soccap ustats from)] (if (zero? from-soc) 0.
-            (let [from-tot (get tot from 1.)]
-              (* num from-bal from-tot from-soc)))))))) sum) 0.)
+        [in-sum-back in-sum-all] (if dm (->> dm (map (fn [[from num]]
+          (let [from-soc (get-soccap ustats from)] (if (zero? from-soc) [0. 0.]
+            (let [from-tot (get tot from 1.) 
+                  all-term (* num from-bal from-tot from-soc) 
+                  from-bal (get bal from 0)
+                  back-term (if (<= from-bal 0) 0. (* from-bal all-term))] 
+              )))) [back-term all-term]) (apply map +)) [0. 0.])
 
         in-sum-all (if dm (->> dm (map (fn [[from num]] 
             (let [from-soc (get-soccap ustats from)] (if (zero? from-soc) 0.
