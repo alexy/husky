@@ -242,8 +242,9 @@ socUserDaySum sgraph day user =
                       if toSoc == 0 then res
                       else
                         let
-                          toTot = M.findWithDefault 1 to tot
-                          !term = fromIntegral (num * toBal * toTot) * toSoc
+                          !toOut = M.findWithDefault 1 to outs
+                          !toTot = M.findWithDefault 1 to tot
+                          !term = fromIntegral (num * toOut * toBal * toTot) * toSoc
                           in
                           res - term -- equivalent to sum of abs terms
                
@@ -261,8 +262,9 @@ socUserDaySum sgraph day user =
                     if toSoc == 0 then res
                     else
                       let
+                        !toIn  = M.findWithDefault 1 to ins
                         !toTot = M.findWithDefault 1 to tot
-                        !allTerm  = fromIntegral (num * toTot) * toSoc
+                        !allTerm  = fromIntegral (num * toIn * toTot) * toSoc
                         -- TODO: corrected by iffing cases
                         !backTerm = if toBal <= 0 then 0 else fromIntegral toBal * allTerm
                         in
