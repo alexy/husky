@@ -1,6 +1,8 @@
 import System (getArgs)
 import System.IO
-import qualified Data.IntMap as M
+import qualified Data.IntMap as IM
+import Data.IntMap ((!))
+import qualified Data.Map as M
 import SocRun
 import Data.Maybe (listToMaybe)
 import Graph
@@ -9,6 +11,7 @@ import Database.TokyoCabinet (runTCM)
 import TokyoGraph (fetchGraph)
 import BinaryGraph
 import qualified IntBS
+import IntBS (IntBS(..))
 
 eprintln s = do
 	hPutStrLn stderr s
@@ -19,33 +22,40 @@ suffix = flip isSuffixOf
 
 -- we have to do both to thread dic through tokyos
 -- there gotta be some monadic way to do with one and combine
-loadAnyGraph :: String -> String -> IO (Graph, Graph)
-loadAnyGraph f1 f2 = 
+loadAnyGraph :: String -> String -> String -> IO (Graph, Graph, IntBS)
+loadAnyGraph f1 f2 dicName = 
   if suffix f1 ".hsb.zip" then do
-    g1 <- loadData f1
-    g2 <- loadData f2
-    return (g1,g2)
+    g1  <- loadData f1
+    g2  <- loadData f2
+    dic <- loadData dicName
+    return (g1,g2,dic)
   else 
   if suffix f1 ".json.hdb" then do
     -- may dump dic on disk right there:
     -- TODO there gotta be some monadic gymnastics for that!
     (dic,g1) <- runTCM (fetchGraph f1 IntBS.empty Nothing (Just 10000))
-    (dic,g2) <- runTCM (fetchGraph f2 dic         Nothing (Just 10000))
-    return (g1,g2)
+    (dic',g2) <- runTCM (fetchGraph f2 dic        Nothing (Just 10000))
+    saveData dic' dicName
+    return (g1,g2,dic')
   else error "unrecognized graph file extension" 
 
+
+disintern dic =
+  let ib = backIB dic in
+  IM.foldWithKey (\k v res -> let name = ib ! k in M.insert name v res) M.empty 
+  
 main :: IO ()
 main = do
   args <- getArgs
-  let drepsName:dmentsName:saveName:restArgs = args
+  let drepsName:dmentsName:dicName:saveName:restArgs = args
   eprintln ("reading graph from " ++ drepsName ++ ", " ++ dmentsName ++ 
-  	", saving dcaps in " ++ saveName)
+  	" user-int dictionary in " ++ dicName ++ ", saving dcaps in " ++ saveName)
   let maxDays :: Maybe Int 
       maxDays = listToMaybe . map read $ restArgs
-  (dreps, dments) <- loadAnyGraph drepsName dmentsName
-  eprintln ("loaded " ++ drepsName  ++ ", " ++ (show . M.size $ dreps))
-  eprintln ("loaded " ++ dmentsName ++ ", " ++ (show . M.size $ dments))
+  (dreps, dments, dic) <- loadAnyGraph drepsName dmentsName dicName
+  eprintln ("loaded " ++ drepsName  ++ ", " ++ (show . IM.size $ dreps))
+  eprintln ("loaded " ++ dmentsName ++ ", " ++ (show . IM.size $ dments))
   
   let SGraph{dcapsSG =dcaps} = socRun dreps dments optSocRun {maxDaysSR= maxDays}
   eprintln ("computed sgraph, now saving dcaps in " ++ saveName)
-  saveData dcaps saveName
+  saveData (disintern dic dcaps) saveName
