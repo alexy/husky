@@ -30,7 +30,7 @@ loadAnyGraph f1 f2 dicName =
   if suffix f1 ".hsb.zip" then do
     g1  <- loadData f1
     g2  <- loadData f2
-    dic <- loadData dicName
+    dic <- if dicName == "none" then return IntBS.empty else loadData dicName
     return (g1,g2,dic)
   else 
   if suffix f1 ".json.hdb" then do
@@ -63,7 +63,13 @@ main = do
   eprintln ("using dictionary in " ++ dicName ++ ", " ++ (show . totalIB $ dic))
   
   let SGraph{dcapsSG =dcaps} = socRun dreps dments optSocRun {maxDaysSR= maxDays}
-  eprintln "computed sgraph, disinterning dcaps"
-  let dcaps' = disintern dic dcaps
-  eprintln ("saving dcaps in " ++ saveName)
-  saveData dcaps' saveName
+  eprintln "computed sgraph"
+  if dicName == "none" 
+    then do
+      eprintln ("saving int dcaps in " ++ saveName)
+      saveData dcaps saveName
+    else do
+      eprintln "disinterning dcaps"
+      let dcaps' = disintern dic dcaps
+      eprintln ("saving string dcaps in " ++ saveName)
+      saveData dcaps' saveName
