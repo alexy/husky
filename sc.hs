@@ -59,7 +59,7 @@ main = do
   	" user-int dictionary in " ++ dicName ++ ", saving dcaps in " ++ saveName)
   let maxDays :: Maybe Int 
       maxDays = listToMaybe . map read $ restArgs
-  (dreps, dments, dic) <- loadAnyGraph drepsName dmentsName dicName
+  (!dreps, !dments, !dic) <- loadAnyGraph drepsName dmentsName dicName
   eprintln ("loaded dreps from " ++ drepsName  ++ ", " ++ (show . IM.size $ dreps))
   eprintln ("loaded dments from " ++ dmentsName ++ ", " ++ (show . IM.size $ dments))
   eprintln ("using dictionary in " ++ dicName ++ ", " ++ (show . totalIB $ dic))
