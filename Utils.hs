@@ -9,6 +9,14 @@ import Data.IntMap (IntMap)
 -- our strict version of M.foldWithKey
 -- the step function obeys the parent's param order
 -- gotta rename it for IntMap vs just Map
+
 foldWithKey' :: (Int -> a -> b -> b) -> b -> IntMap a -> b
 foldWithKey' f z m = foldl' step z (IM.toList m)
   where step res (k,v) = f k v res
+
+-- @Cale http://tunes.org/~nef/logs/haskell/10.06.22
+-- Ah, toAscList is written using foldrWithKey anyway,
+-- so if your Map is so large that foldrWithKey is problematic, then perhaps that's a problem.
+
+toAscList t = build (foldrWithKey (\k x xs -> (\cons nil -> cons (k,x) xs)) (\cons nil -> nil) t)
+-- Then it'd fuse.

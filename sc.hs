@@ -46,6 +46,8 @@ loadAnyGraph f1 f2 dicName =
 
 -- this is not strict enough, the thing explodes
 -- might as well disintern into a Trie instead
+-- TODO: Cale suggested using builder for toAscList
+-- on #haskell circa 2010-06-22 -- see Utils.hs
 disintern dic =
   let ib = backIB dic in
   -- \!k was a syntax error... on ->
@@ -58,13 +60,13 @@ main = do
   eprintln ("reading graph from " ++ drepsName ++ ", " ++ dmentsName ++ 
   	" user-int dictionary in " ++ dicName ++ ", saving dcaps in " ++ saveName)
   let maxDays :: Maybe Int 
-      maxDays = listToMaybe . map read $ restArgs
+      !maxDays = listToMaybe . map read $ restArgs
   (!dreps, !dments, !dic) <- loadAnyGraph drepsName dmentsName dicName
   eprintln ("loaded dreps from " ++ drepsName  ++ ", " ++ (show . IM.size $ dreps))
   eprintln ("loaded dments from " ++ dmentsName ++ ", " ++ (show . IM.size $ dments))
   eprintln ("using dictionary in " ++ dicName ++ ", " ++ (show . totalIB $ dic))
   
-  let SGraph{dcapsSG =dcaps} = socRun dreps dments optSocRun {maxDaysSR= maxDays}
+  let SGraph{dcapsSG =!dcaps} = socRun dreps dments optSocRun {maxDaysSR= maxDays}
   eprintln "computed sgraph"
   if dicName == "none" 
     then do
