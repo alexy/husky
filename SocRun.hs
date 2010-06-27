@@ -101,7 +101,7 @@ socRun dreps dments opts =
       !firstDay = fst $ M.findMin dstarts
       !lastDay  = let x' = maybe lastDay0 (\y -> min lastDay0 (firstDay + y - 1)) (maxDaysSR opts)
       			      in
-                    trace ("doing days from " ++ (show firstDay) ++ " to " ++ (show x'))
+                    trace ("total users: " ++ (show . M.size $ presMap) ++ ", doing days from " ++ (show firstDay) ++ " to " ++ (show x'))
                     x'
 
 
