@@ -44,6 +44,8 @@ loadAnyGraph f1 f2 dicName =
   else error "unrecognized graph file extension" 
 
 
+-- this is not strict enough, the thing explodes
+-- might as well disintern into a Trie instead
 disintern dic =
   let ib = backIB dic in
   -- \!k was a syntax error... on ->

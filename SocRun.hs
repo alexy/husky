@@ -288,9 +288,9 @@ socUserDaySum sgraph day user =
         -- outs' = case dm_ of {Just dm -> addMaps outs dm; _ -> outs}
 
         -- v1
-        -- call_some f v = case v of Nothing -> id; Just v -> f v
-        -- ins'  = call_some (addMaps ins)  dr_ 
-        -- outs' = call_some (addMaps outs) dm_ 
+        call_some f m x = case x of Nothing -> m; Just v -> f m v
+        ins'  = call_some addMaps ins  dr_ 
+        outs' = call_some addMaps outs dm_ 
 
         -- doesn't compile:
         -- mayAddMaps x = call_some (addMaps x)
@@ -302,9 +302,9 @@ socUserDaySum sgraph day user =
         -- v2
         -- ddarius:
         -- case m of Nothing -> n; Just x -> j x <=> maybe n j m
-        mayAddMaps m x = maybe m (addMaps m) x
-        ins'  = mayAddMaps ins  dr_
-        outs' = mayAddMaps outs dm_
+        -- mayAddMaps m x = maybe m (addMaps m) x
+        -- ins'  = mayAddMaps ins  dr_
+        -- outs' = mayAddMaps outs dm_
 
 
         -- ziman: M.unionWith (+) `on` maybe M.empty id
