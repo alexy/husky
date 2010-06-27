@@ -1,7 +1,10 @@
+{-# LANGUAGE BangPatterns #-}
+
 import System (getArgs)
 import System.IO
 import qualified Data.IntMap as IM
 import Data.IntMap ((!))
+import Utils (foldWithKey')
 import qualified Data.Map as M
 import SocRun
 import Data.Maybe (listToMaybe)
@@ -43,7 +46,8 @@ loadAnyGraph f1 f2 dicName =
 
 disintern dic =
   let ib = backIB dic in
-  IM.foldWithKey (\k v res -> let name = ib ! k in M.insert name v res) M.empty 
+  -- \!k was a syntax error... on ->
+  foldWithKey' (\ !k !v !res -> let !name = ib ! k in M.insert name v res) M.empty 
   
 main :: IO ()
 main = do
@@ -59,5 +63,7 @@ main = do
   eprintln ("using dictionary in " ++ dicName ++ ", " ++ (show . totalIB $ dic))
   
   let SGraph{dcapsSG =dcaps} = socRun dreps dments optSocRun {maxDaysSR= maxDays}
-  eprintln ("computed sgraph, now saving dcaps in " ++ saveName)
-  saveData (disintern dic dcaps) saveName
+  eprintln "computed sgraph, disinterning dcaps"
+  let dcaps' = disintern dic dcaps
+  eprintln ("saving dcaps in " ++ saveName)
+  saveData dcaps' saveName

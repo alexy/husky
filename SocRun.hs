@@ -1,6 +1,5 @@
 {-# LANGUAGE BangPatterns #-}
 
-
 module SocRun (
   UserStats,
   DCaps,
@@ -16,6 +15,7 @@ import Data.List (groupBy,sortBy,foldl1')
 import Data.Function (on)
 import qualified Data.IntMap as M
 import Data.IntMap ((!))
+import Utils (foldWithKey')
 -- is there a difference between foldl' from Foldable or List?
 -- import Data.Foldable (foldl')
 import Data.List (maximum,foldl')
@@ -214,12 +214,6 @@ getSocCap ustats user =
   case M.lookup user ustats of
     Just UserStats{socUS =soc} -> soc
     _ -> 0
-
--- our strict version of M.foldWithKey
--- the step function obeys the parent's param order
-foldWithKey' :: (Int -> a -> b -> b) -> b -> M.IntMap a -> b
-foldWithKey' f z m = foldl' step z (M.toList m)
-  where step res (k,v) = f k v res
           
 socUserDaySum sgraph day user =
   let
