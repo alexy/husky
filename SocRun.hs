@@ -51,7 +51,7 @@ newUserStats soc day = UserStats {socUS = soc, dayUS = day,
 type UStats = M.IntMap UserStats
 data SocRun = SocRun {alphaSR :: !Float, betaSR :: !Float, gammaSR :: !Float,
                       socInitSR :: !Float, maxDaysSR :: Maybe Int}
-optSocRun = SocRun 0.00001 0.5 0.5 1.0 Nothing
+optSocRun = SocRun 0.1 0.5 0.5 1.0 Nothing
 
 data SGraph = SGraph {drepsSG :: !Graph, dmentsSG :: !Graph, dcapsSG :: !DCaps, ustatsSG :: !UStats}
 
@@ -112,13 +112,13 @@ socRun dreps dments opts =
       -- inject the users first appearing in this cycle
         let
           nus       = newUserStats socInit day
-          !ustats    = ustatsSG sgraph
+          !ustats   = ustatsSG sgraph
           newUsers  = let x = dstarts ! day in
                         trace ("adding " ++ (show . length $ x) ++ " new users on day " ++ (show day))
                         x
-          !ustats' = foldl' insn ustats newUsers
-          insn m u = M.insert u nus m
-          !sgraph'   = trace ("now got " ++ show (M.size ustats')) sgraph {ustatsSG = ustats'}
+          !ustats'  = foldl' insn ustats newUsers
+          insn m u  = M.insert u nus m
+          !sgraph'  = trace ("now got " ++ show (M.size ustats')) sgraph {ustatsSG = ustats'}
         in
           socDay sgraph' params day
 
@@ -294,9 +294,16 @@ socUserDaySum sgraph day user =
         -- outs' = case dm_ of {Just dm -> addMaps outs dm; _ -> outs}
 
         -- v1
-        -- call_some v f = case v of Nothing -> id | Just v -> f v
-        -- ins'  = call_some dr_ (addMaps ins)
-        -- outs' = call_some dm_ (addMaps outs)
+        -- call_some f v = case v of Nothing -> id; Just v -> f v
+        -- ins'  = call_some (addMaps ins)  dr_ 
+        -- outs' = call_some (addMaps outs) dm_ 
+
+        -- doesn't compile:
+        -- mayAddMaps x = call_some (addMaps x)
+        -- ddarius
+        -- call_some = maybe id
+        -- dons
+        -- ... fmap (addMaps ins) dr_ ...
                 
         -- v2
         -- ddarius:
@@ -305,10 +312,6 @@ socUserDaySum sgraph day user =
         ins'  = mayAddMaps ins  dr_
         outs' = mayAddMaps outs dm_
 
-        -- dons
-        -- ... fmap (addMaps ins) dr_ ...
-        -- ddarius
-        -- call_some = flip (maybe id)
 
         -- ziman: M.unionWith (+) `on` maybe M.empty id
         (tot', bal')  =

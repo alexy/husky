@@ -17,6 +17,8 @@ eprintln s = do
 -- may yse Sustem.FilePath.takeExtension repeatedly:
 suffix = flip isSuffixOf
 
+-- we have to do both to thread dic through tokyos
+-- there gotta be some monadic way to do with one and combine
 loadAnyGraph :: String -> String -> IO (Graph, Graph)
 loadAnyGraph f1 f2 = 
   if suffix f1 ".hsb.zip" then do
