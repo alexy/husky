@@ -74,15 +74,18 @@ minMax2 (oldMin, oldMax) (x,y) =
 dayRanges :: Graph -> M.IntMap (Int, Int)
 dayRanges dreps = M.map doDays dreps
   where
-    doDays days = case fst $ M.findMin days of
-                    !f -> case fst $ M.findMax days of
-                            !l -> (f, l)
+    doDays days = 
+     case fst $ M.findMin days of
+             !f -> case fst $ M.findMax days of
+                      !l -> (f, l)
+
+-- elemAt absent from IntMap
 --       let (!start, _) = M.elemAt 0 days -- i.e. "any map entry"
 --           range@(!f,!l) = foldl' minMax1 (start, start) (M.keys days) in
 --           range
 
 -- merge two day-ranges results
--- mergeDayRanges dr1 dr2 = M.unionWith min_max dr1 dr2
+-- mergeDayRanges dr1 dr2 = M.unionWith minMax2 dr1 dr2
 
 -- socRun :: Graph -> Graph -> SocRun -> IO ()
 socRun dreps dments opts =
