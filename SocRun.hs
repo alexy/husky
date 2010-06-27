@@ -245,7 +245,7 @@ socUserDaySum sgraph day user =
                   if toBal >= 0 then res
                   else
                     let !toSoc = getSocCap ustats to in
-                      if toSoc == 0 then res
+                      if toSoc == 0.0 then res
                       else
                         let
                           !toOut = M.findWithDefault 1 to outs
@@ -257,26 +257,27 @@ socUserDaySum sgraph day user =
 
         (!inSumBack,!inSumAll) = {-# SCC "inSumBack" #-}
           case dm_ of
-            Nothing -> (0,0)
+            Nothing -> (0.0,0.0)
             Just dm ->
-              foldWithKey' step (0,0) dm
+              foldWithKey' step (0.0,0.0) dm
               where
                  step !to !num res@(!backSum,!allSum) = {-# SCC "inStep" #-}
                   let 
                     !toSoc = getSocCap ustats to in
-                    if toSoc == 0 then res
+                    if toSoc == 0.0 then res
                     else
                       let
                         !toIn  = M.findWithDefault 1 to ins
                         !toTot = M.findWithDefault 1 to tot
                         !allTerm  = fromIntegral (num * toIn * toTot) * toSoc
                         !toBal = M.findWithDefault 0 to bal
-                        !backTerm = if toBal <= 0 then 0 else fromIntegral toBal * allTerm
+                        !backTerm = if toBal <= 0 then 0.0 else fromIntegral toBal * allTerm
                         in
                         (backSum + backTerm,allSum + allTerm)
 
 
         terms = (outSum, inSumBack, inSumAll)
+
 
         addMaps       = M.unionWith (+)
         addsMaps      = M.unionsWith (+)
@@ -285,8 +286,26 @@ socUserDaySum sgraph day user =
         -- in OCaml, replaced by hashMergeWithDef, so the op is supplied the left operand, e.g. 0
         -- subtractMaps = M.unionWith (-)
 
-        ins'  = case dr_ of {Just dr -> addMaps ins  dr;  _ -> ins}
-        outs' = case dm_ of {Just dm -> addMaps outs dm; _ -> outs}
+        -- v0
+        -- ins'  = case dr_ of {Just dr -> addMaps ins  dr;  _ -> ins}
+        -- outs' = case dm_ of {Just dm -> addMaps outs dm; _ -> outs}
+
+        -- v1
+        -- call_some v f = case v of Nothing -> id | Just v -> f v
+        -- ins'  = call_some dr_ (addMaps ins)
+        -- outs' = call_some dm_ (addMaps outs)
+                
+        -- v2
+        -- ddarius:
+        -- case m of Nothing -> n; Just x -> j x <=> maybe n j m
+        mayAddMaps m x = maybe m (addMaps m) x
+        ins'  = mayAddMaps ins  dr_
+        outs' = mayAddMaps outs dm_
+
+        -- dons
+        -- ... fmap (addMaps ins) dr_ ...
+        -- ddarius
+        -- call_some = flip (maybe id)
 
         -- ziman: M.unionWith (+) `on` maybe M.empty id
         (tot', bal')  =
