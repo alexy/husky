@@ -64,7 +64,7 @@ main = do
       !maxDays = listToMaybe . map read $ restArgs
   (!dreps, !dments, !dicIB) <- loadAnyGraph drepsName dmentsName dicName
   
-  eprintln ("loaded dreps from "    ++ drepsName ++ ", " ++ (show . IM.size $ dreps))
+  eprintln ("loaded dreps from "   ++ drepsName  ++ ", " ++ (show . IM.size $ dreps))
   eprintln ("loaded dments from "  ++ dmentsName ++ ", " ++ (show . IM.size $ dments))
   eprintln ("using dictionary in " ++ dicName    ++ ", " ++ (show . IM.size $ dicIB))
   
