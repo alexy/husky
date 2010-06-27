@@ -36,6 +36,7 @@ loadAnyGraph f1 f2 dicName =
     (dic,g1) <- runTCM (fetchGraph f1 IntBS.empty Nothing (Just 10000))
     (dic',g2) <- runTCM (fetchGraph f2 dic        Nothing (Just 10000))
     saveData dic' dicName
+    eprintln "saved the user<=>int dictionary"
     return (g1,g2,dic')
   else error "unrecognized graph file extension" 
 
@@ -53,8 +54,9 @@ main = do
   let maxDays :: Maybe Int 
       maxDays = listToMaybe . map read $ restArgs
   (dreps, dments, dic) <- loadAnyGraph drepsName dmentsName dicName
-  eprintln ("loaded " ++ drepsName  ++ ", " ++ (show . IM.size $ dreps))
-  eprintln ("loaded " ++ dmentsName ++ ", " ++ (show . IM.size $ dments))
+  eprintln ("loaded dreps from " ++ drepsName  ++ ", " ++ (show . IM.size $ dreps))
+  eprintln ("loaded dments from " ++ dmentsName ++ ", " ++ (show . IM.size $ dments))
+  eprintln ("using dictionary in " ++ dicName ++ ", " ++ (show . totalIB $ dic))
   
   let SGraph{dcapsSG =dcaps} = socRun dreps dments optSocRun {maxDaysSR= maxDays}
   eprintln ("computed sgraph, now saving dcaps in " ++ saveName)
