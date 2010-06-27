@@ -19,10 +19,10 @@ suffix = flip isSuffixOf
 
 loadAnyGraph :: String -> IO Graph
 loadAnyGraph fileName = 
-  if suffix fileName "mlb" then
+  if suffix fileName ".hsb.zip" then
     loadData fileName
   else 
-  if suffix fileName "json.hdb" then do
+  if suffix fileName ".json.hdb" then do
     (dic,graph) <- runTCM (fetchGraph fileName IntBS.empty Nothing (Just 10000))
     return graph
   else error "unrecognized graph file extension" 
