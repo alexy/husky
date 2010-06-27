@@ -1,5 +1,6 @@
 module IntBS (
   IntBS (..),
+  IntMapBS,
   empty,
   insert,
   lookupBS,
@@ -16,11 +17,12 @@ import Data.Binary
 import Control.Monad (liftM3)
 import BinaryGraph
 
-data IntBS = IntBS { trieIB :: Trie Int, totalIB :: Int, backIB :: IntMap ByteString }
-empty = IntBS T.empty 0 M.empty
+type IntMapBS = IntMap ByteString
+data IntBS = IntBS {backIB :: IntMapBS, totalIB :: Int, trieIB :: Trie Int}
+empty = IntBS M.empty 0 T.empty
 
 instance Binary IntBS where 
-  put (IntBS t n m) = put t >> put n >> put m
+  put (IntBS a b c) = put a >> put b >> put c
   get = liftM3 IntBS get get get
   
 insert :: IntBS -> ByteString -> (IntBS, Int)
@@ -33,7 +35,7 @@ insert dic s =
              t' = T.insert s n t
              m  = backIB dic
              m' = M.insert n s m in
-             (IntBS t' n m',n)
+             (IntBS m' n t',n)
              
 lookupBS :: IntBS -> ByteString -> Maybe Int
 lookupBS dic s =
@@ -45,4 +47,4 @@ lookupInt dic i =
   let m = backIB dic in
   M.lookup i m
   
-save ib fileName = saveData (backIB ib) fileName
+saveIB ib fileName = saveData (backIB ib) fileName

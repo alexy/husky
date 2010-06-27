@@ -18,5 +18,5 @@ foldWithKey' f z m = foldl' step z (IM.toList m)
 -- Ah, toAscList is written using foldrWithKey anyway,
 -- so if your Map is so large that foldrWithKey is problematic, then perhaps that's a problem.
 
-toAscList t = build (foldrWithKey (\k x xs -> (\cons nil -> cons (k,x) xs)) (\cons nil -> nil) t)
+-- toAscList t = builder (foldrWithKey (\k x xs -> (\cons nil -> cons (k,x) xs)) (\cons nil -> nil) t)
 -- Then it'd fuse.
