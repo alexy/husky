@@ -89,19 +89,19 @@ socRun dreps dments opts =
     let
       params  = paramSC opts
       socInit = socInitSR opts
-      dcaps   = M.empty -- TODO type
-      ustats  = M.empty -- type
+      dcaps   = M.empty
+      ustats  = M.empty
       sgraph  = SGraph dreps dments dcaps ustats
-      presMap = M.unionWith minMax2 (dayRanges dreps) (dayRanges dments)
-      !l0 = snd . snd $ M.findMax presMap
-      (!lastDay0, !dstarts) = foldl' updt (l0, M.empty) (M.assocs presMap)
+      dranges = M.unionWith minMax2 (dayRanges dreps) (dayRanges dments)
+      !l0 = snd . snd $ M.findMax dranges
+      (!lastDay0, !dstarts) = foldl' updt (l0, M.empty) (M.assocs dranges)
       -- Data.Map has insertWith' which we used below, but Data.IntMap doesn't:
       -- updt (!ld, !m) (u,(f,l)) = (max ld l, M.insertWith' (++) f [u] m)
-      updt (!ld, !m) (u,(f,l)) = (max ld l, M.insertWith (++) f [u] m)
+      updt (!ld, !m) (u,(f,l)) = (max ld l, M.alter (\mus -> case mus of Nothing -> Just [u]; Just us -> Just (u:us)) f m)
       !firstDay = fst $ M.findMin dstarts
       !lastDay  = let x' = maybe lastDay0 (\y -> min lastDay0 (firstDay + y - 1)) (maxDaysSR opts)
       			      in
-                    trace ("total users: " ++ (show . M.size $ presMap) ++ ", doing days from " ++ (show firstDay) ++ " to " ++ (show x'))
+                    trace ((show . M.size $ dranges) ++ " total users, doing days from " ++ (show firstDay) ++ " to " ++ (show x'))
                     x'
 
 

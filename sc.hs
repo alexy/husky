@@ -8,7 +8,7 @@ import Data.List (isSuffixOf)
 import Database.TokyoCabinet (runTCM)
 import TokyoGraph (fetchGraph)
 import BinaryGraph
-import IntBS
+import qualified IntBS
 
 eprintln s = do
 	hPutStrLn stderr s
@@ -23,6 +23,7 @@ loadAnyGraph fileName =
     loadData fileName
   else 
   if suffix fileName ".json.hdb" then do
+    -- may dump dic on disk right there:
     (dic,graph) <- runTCM (fetchGraph fileName IntBS.empty Nothing (Just 10000))
     return graph
   else error "unrecognized graph file extension" 
@@ -35,12 +36,11 @@ main = do
   	", saving dcaps in " ++ saveName)
   let maxDays :: Maybe Int 
       maxDays = listToMaybe . map read $ restArgs
-  dreps <- loadAnyGraph drepsName
+  dreps <- loadAnyGraph  drepsName
   eprintln ("loaded " ++ drepsName ++ ", " ++ (show . M.size $ dreps))
   dments <- loadAnyGraph dmentsName
   eprintln ("loaded " ++ dmentsName ++ ", " ++ (show . M.size $ dments))
   
   let SGraph{dcapsSG =dcaps} = socRun dreps dments optSocRun {maxDaysSR= maxDays}
   eprintln ("computed sgraph, now saving dcaps in " ++ saveName)
-  -- printGraph dcaps
   saveData dcaps saveName
