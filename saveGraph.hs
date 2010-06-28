@@ -23,9 +23,9 @@ main = do
           v:w:x:_ -> (v,w,Just x,Nothing,Just 10000)
           v:w:_ -> (v,w,Nothing,Nothing,Just 10000)
           _ -> error "need a file name for the cabinet and a base to save"
-  let ext = ".bin.zip"
-      graphFile = saveBase ++ ".graph" ++ ext
-      usersFile = saveBase ++ ".users" ++ ext
+  let ext = ".hsb.zip"
+      graphFile = saveBase ++ ".int" ++ ext
+      usersFile = saveBase ++ ".dic" ++ ext
   dic <- case users of
           Just fileName | (fileName /= "no") -> loadData fileName
           _ -> return IB.empty
