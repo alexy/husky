@@ -13,8 +13,8 @@ import Graph
 import Data.Ord (comparing)
 import Data.List (groupBy,sortBy,foldl1')
 import Data.Function (on)
-import qualified Data.IntMap as M
-import Data.IntMap ((!))
+import qualified IntMap as M
+import IntMap ((!))
 import Utils (foldWithKey')
 -- is there a difference between foldl' from Foldable or List?
 -- import Data.Foldable (foldl')
@@ -74,7 +74,7 @@ minMax2 (oldMin, oldMax) (x,y) =
 dayRanges :: Graph -> M.IntMap (Int, Int)
 dayRanges dreps = M.map doDays dreps
   where
-    doDays days = 
+    doDays days =
      case fst $ M.findMin days of
              !f -> case fst $ M.findMax days of
                       !l -> (f, l)
@@ -96,12 +96,13 @@ socRun dreps dments opts =
       ustats  = M.empty
       sgraph  = SGraph dreps dments dcaps ustats
       dranges = M.unionWith minMax2 (dayRanges dreps) (dayRanges dments)
-      !l0 = snd . snd $ M.findMax dranges
+      l0 = snd . snd $ M.findMax dranges
       (!lastDay0, !dstarts) = foldl' updt (l0, M.empty) (M.assocs dranges)
       -- Data.Map has insertWith' which we used below, but Data.IntMap doesn't:
       -- updt (!ld, !m) (u,(f,l)) = (max ld l, M.insertWith' (++) f [u] m)
-      updt (!ld, !m) (u,(f,l)) = (max ld l, M.alter (\mus -> case mus of Nothing -> Just [u]; Just us -> Just (u:us)) f m)
-      !firstDay = fst $ M.findMin dstarts
+      updt (!ld, !m) (u,(f,l)) = (max ld l, M.insertWith (++) f [u] m)
+      -- M.alter (\mus -> case mus of Nothing -> Just [u]; Just us -> Just (u:us)) f m)
+      firstDay = fst $ M.findMin dstarts
       !lastDay  = let x' = maybe lastDay0 (\y -> min lastDay0 (firstDay + y - 1)) (maxDaysSR opts)
       			      in
                     trace ((show . M.size $ dranges) ++ " total users, doing days from " ++ (show firstDay) ++ " to " ++ (show x'))
@@ -149,20 +150,21 @@ socDay sgraph params day =
     -- users = M.keys ustats
 
     -- my bangs, needed?
-    tsmap u _ = case socUserDaySum sgraph day u of
-                 (Nothing,st) -> st `seq` (Nothing,st)
-                 (Just x, st) -> x `seq` st `seq` (Just x, st)
-    !termsStats = {-# SCC "termsStats" #-} M.mapWithKey tsmap ustats
+    tsmap !u _ = socUserDaySum sgraph day u
+--     tsmap u _ = case socUserDaySum sgraph day u of
+--                  (Nothing,st) -> st `seq` (Nothing,st)
+--                  (Just x, st) -> x `seq` st `seq` (Just x, st)
+    termsStats = {-# SCC "termsStats" #-} M.mapWithKey tsmap ustats
    -- !termsStats = M.mapWithKey (const . socUserDaySum sgraph day) ustats
     sumTerms   = catMaybes . map fst . M.elems $ termsStats
 
     -- norms = foldl1' (zipWith (+)) sumTerms
     norms@(!a,!b,!c) = {-# SCC "norms" #-}
-      let res@(!a,!b,!c) = foldl1' (\(!x,!y,!z) (!x',!y',!z') -> (x+x',y+y',z+z')) sumTerms 
+      let res@(!a,!b,!c) = foldl1' (\(!x,!y,!z) (!x',!y',!z') -> (x+x',y+y',z+z')) sumTerms
       in trace ("day " ++ (show day) ++ " norms: [" ++ (show a) ++ ", " ++ (show b) ++ ", " ++ (show c) ++ "]")
          res
 
-    tick (!numers,!stats) = {-# SCC "socDay.tick" #-}
+    tick (numers,!stats) = {-# SCC "socDay.tick" #-}
       let
         !soc = socUS stats
         !soc' =
@@ -194,7 +196,7 @@ socDay sgraph params day =
             !soc -> M.alter addDay user res
               where addDay Nothing   = Just [(day,soc)]
                     addDay (Just ds) = Just ((day,soc):ds)
-                        
+
     in
     sgraph {ustatsSG= ustats', dcapsSG= dcaps'}
 
@@ -214,13 +216,13 @@ getSocCap ustats user =
   case M.lookup user ustats of
     Just UserStats{socUS =soc} -> soc
     _ -> 0
-          
+
 socUserDaySum sgraph day user =
   let
     SGraph {drepsSG =dreps, dmentsSG =dments, ustatsSG =ustats} = sgraph
     !stats = {-# SCC "socUDSum.stats" #-} ustats ! user
-    !dr_ = getUserDay user day dreps
-    !dm_ = getUserDay user day dments
+    dr_ = getUserDay user day dreps
+    dm_ = getUserDay user day dments
     in
 
     if not (isJust dr_ || isJust dm_) then
@@ -250,7 +252,7 @@ socUserDaySum sgraph day user =
                           !term = fromIntegral (num * toOut * toBal * toTot) * toSoc
                           in
                           res - term -- equivalent to sum of abs terms
-               
+
 
         (!inSumBack,!inSumAll) = {-# SCC "inSumBack" #-}
           case dm_ of
@@ -259,7 +261,7 @@ socUserDaySum sgraph day user =
               foldWithKey' step (0.0,0.0) dm
               where
                  step !to !num res@(!backSum,!allSum) = {-# SCC "inStep" #-}
-                  let 
+                  let
                     !toSoc = getSocCap ustats to in
                     if toSoc == 0.0 then res
                     else
@@ -289,8 +291,8 @@ socUserDaySum sgraph day user =
 
         -- v1
         call_some f m x = case x of Nothing -> m; Just v -> f m v
-        ins'  = call_some addMaps ins  dr_ 
-        outs' = call_some addMaps outs dm_ 
+        ins'  = call_some addMaps ins  dr_
+        outs' = call_some addMaps outs dm_
 
         -- doesn't compile:
         -- mayAddMaps x = call_some (addMaps x)
@@ -298,7 +300,7 @@ socUserDaySum sgraph day user =
         -- call_some = maybe id
         -- dons
         -- ... fmap (addMaps ins) dr_ ...
-                
+
         -- v2
         -- ddarius:
         -- case m of Nothing -> n; Just x -> j x <=> maybe n j m
