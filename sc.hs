@@ -2,8 +2,8 @@
 
 import System (getArgs)
 import System.IO
-import qualified Data.IntMap as IM
-import Data.IntMap ((!))
+import qualified IntMap as IM
+import IntMap ((!))
 import Utils (foldWithKey')
 import qualified Data.Map as M
 import SocRun
@@ -20,7 +20,7 @@ eprintln s = do
 	hPutStrLn stderr s
 	hFlush stderr
 
--- may yse Sustem.FilePath.takeExtension repeatedly:
+-- may use Sustem.FilePath.takeExtension repeatedly:
 suffix = flip isSuffixOf
 
 -- we have to do both to thread dic through tokyos
@@ -50,9 +50,13 @@ loadAnyGraph f1 f2 dicName =
 -- might as well disintern into a Trie instead
 -- TODO: Cale suggested using builder for toAscList
 -- on #haskell circa 2010-06-22 -- see Utils.hs
-disintern !ib !m =
-   -- \!k was a syntax error... on ->
-  foldWithKey' (\ !k !v !res -> let !name = ib ! k in M.insert name v res) M.empty m
+
+disintern !ib =
+ in M.foldWithKey step M.empty
+   where
+     step !k !v !res = {-# SCC "disintern.step" #-} case ib ! k of
+                          !name -> M.insert name v res
+
   
 main :: IO ()
 main = do

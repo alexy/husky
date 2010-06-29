@@ -7,8 +7,8 @@ module IntBS (
   lookupInt
 ) where
   
-import qualified Data.IntMap as M
-import Data.IntMap (IntMap)
+import qualified IntMap as M
+import IntMap (IntMap)
 import qualified Data.Trie as T
 import Data.Trie (Trie)
 import qualified Data.ByteString.Char8 as B

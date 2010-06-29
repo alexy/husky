@@ -7,7 +7,7 @@ import qualified IntBS as IB
 import IntBS (IntBS)
 import qualified Data.Trie as T
 import Text.JSONb
-import qualified Data.IntMap as M
+import qualified IntMap as M
 import qualified Data.ByteString.Char8 as B
 import Data.ByteString.Char8 (ByteString)
 import qualified Data.Ratio as R

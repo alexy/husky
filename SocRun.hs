@@ -6,7 +6,6 @@ module SocRun (
   SGraph(..),
   SocRun(..), socRun, optSocRun
   )
--- TODO exports
 where
 
 import Graph
@@ -15,7 +14,6 @@ import Data.List (groupBy,sortBy,foldl1')
 import Data.Function (on)
 import qualified IntMap as M
 import IntMap ((!))
-import Utils (foldWithKey')
 -- is there a difference between foldl' from Foldable or List?
 -- import Data.Foldable (foldl')
 import Data.List (maximum,foldl')
@@ -187,7 +185,7 @@ socDay sgraph params day =
     !ustats' = {-# SCC "ustats'" #-} M.map tick termsStats
 
     -- TODO: @dafis strictified this, but the logic needs checking
-    !dcaps' = {-# SCC "dcaps'" #-} foldWithKey' updateUser dcaps ustats'
+    !dcaps' = {-# SCC "dcaps'" #-} M.foldWithKey updateUser dcaps ustats'
       where
         updateUser !user !stats !res =
           case socUS stats of
@@ -237,7 +235,7 @@ socUserDaySum sgraph day user =
           case dr_ of
             Nothing -> 0
             Just dr ->
-              foldWithKey' step 0 dr
+              M.foldWithKey step 0 dr
               where
                  step !to !num !res = {-# SCC "outStep" #-}
                   let !toBal = M.findWithDefault 0 to bal in
@@ -258,7 +256,7 @@ socUserDaySum sgraph day user =
           case dm_ of
             Nothing -> (0.0,0.0)
             Just dm ->
-              foldWithKey' step (0.0,0.0) dm
+              M.foldWithKey step (0.0,0.0) dm
               where
                  step !to !num res@(!backSum,!allSum) = {-# SCC "inStep" #-}
                   let

@@ -7,7 +7,7 @@ module Graph (
 ) where
 
 import IntBS (IntBS)
-import Data.IntMap (IntMap)
+import IntMap (IntMap)
 
 type User     = Int
 type Reps     = IntMap Int
