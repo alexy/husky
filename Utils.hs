@@ -1,10 +1,13 @@
 module Utils (
-  foldWithKey'
+  foldWithKey',
+  Timings,
+  getTiming
  ) where
 
 import Data.List (foldl')
 import qualified Data.IntMap as IM
 import Data.IntMap (IntMap)
+import System.CPUTime
 
 -- our strict version of M.foldWithKey
 -- the step function obeys the parent's param order
@@ -28,3 +31,12 @@ foldWithKey' f z m = foldl' step z (IM.toList m)
 -- system "ps -p $PPID -o etime,cmd"
 -- the ,cmd is just there for diagnosis
 -- 'system' from System.Process
+
+type Timings = [Int]
+
+getTiming :: IO Int
+getTiming = do
+  t <- getCPUTime
+  -- how do I convert 1e9 to teh type of 1000000000?
+  let timing = fromIntegral t `div` 1000000000
+  return timing

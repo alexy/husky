@@ -9,6 +9,7 @@ module SocRun (
 where
 
 import Graph
+import Utils (Timings,getTiming)
 import Data.Ord (comparing)
 import Data.List (groupBy,sortBy,foldl1')
 import Data.Function (on)
@@ -28,31 +29,34 @@ import Control.Monad ((>=>))
 --   hPrint stderr x
 --   hFlush stderr
 
-type DCaps = M.IntMap [(Int,Float)]
+type DCaps = M.IntMap [(Int,Double)]
 type TalkBalance = M.IntMap Int
 
 emptyTalk :: TalkBalance
 emptyTalk = M.empty
 
 data UserStats = UserStats {
-    socUS  :: !Float,
+    socUS  :: !Double,
     dayUS  :: !Int,
     insUS  :: TalkBalance,
     outsUS :: TalkBalance,
     totUS  :: TalkBalance,
     balUS  :: TalkBalance}
 
-newUserStats :: Float -> Int -> UserStats
+newUserStats :: Double -> Int -> UserStats
 newUserStats soc day = UserStats {socUS = soc, dayUS = day,
   insUS = emptyTalk, outsUS = emptyTalk, totUS = emptyTalk, balUS = emptyTalk}
 
 type UStats = M.IntMap UserStats
-data SocRun = SocRun {alphaSR :: !Float, betaSR :: !Float, gammaSR :: !Float,
-                      socInitSR :: !Float, maxDaysSR :: Maybe Int}
+data SocRun = SocRun {alphaSR :: !Double, betaSR :: !Double, gammaSR :: !Double,
+                      socInitSR :: !Double, maxDaysSR :: Maybe Int}
 optSocRun = SocRun 0.1 0.5 0.5 1.0 Nothing
 
 data SGraph = SGraph {drepsSG :: !Graph, dmentsSG :: !Graph, dcapsSG :: !DCaps, ustatsSG :: !UStats}
 
+type SCParams = (Double,Double,Double)
+
+paramSC :: SocRun -> SCParams
 paramSC (SocRun {alphaSR =a, betaSR =b, gammaSR =g}) = (a, b, g)
 
 minMax1 (oldMin, oldMax) x =
@@ -85,8 +89,9 @@ dayRanges dreps = M.map doDays dreps
 -- merge two day-ranges results
 -- mergeDayRanges dr1 dr2 = M.unionWith minMax2 dr1 dr2
 
--- socRun :: Graph -> Graph -> SocRun -> IO ()
-socRun dreps dments opts =
+
+socRun :: Graph -> Graph -> SocRun -> IO (SGraph,Timings)
+socRun dreps dments opts = do
     let
       params  = paramSC opts
       socInit = socInitSR opts
@@ -105,11 +110,12 @@ socRun dreps dments opts =
       			      in
                     trace ((show . M.size $ dranges) ++ " total users, doing days from " ++ (show firstDay) ++ " to " ++ (show x'))
                     x'
-
-
-      tick sgraph day =
-      -- inject the users first appearing in this cycle
+                    
+      tick :: IO (SGraph,Timings) -> Int -> IO (SGraph,Timings)
+      tick st day = do
+        (sgraph,ts) <- st
         let
+        -- inject the users first appearing in this cycle
           nus       = newUserStats socInit day
           !ustats   = ustatsSG sgraph
           newUsers  = let x = dstarts ! day in
@@ -117,12 +123,12 @@ socRun dreps dments opts =
                         x
           !ustats'  = foldl' insn ustats newUsers
           insn m u  = M.insert u nus m
-          !sgraph'  = trace ("now got " ++ show (M.size ustats')) sgraph {ustatsSG = ustats'}
-        in
-          socDay sgraph' params day
-
-    in
-      foldl' tick sgraph [firstDay..lastDay]
+          !sgraph1  = trace ("now got " ++ show (M.size ustats')) sgraph {ustatsSG = ustats'}
+          !sgraph2  = socDay sgraph1 params day
+        t <- getTiming -- milliseconds
+        return (sgraph,t:ts)
+    
+    foldl' tick (return (sgraph,[])) [firstDay..lastDay]
 
 -- socDay sgraph params day = undefined
 
@@ -139,6 +145,7 @@ safeDivide3 (x,y,z) (x',y',z') =
     !c = safeDivide z z'
   in (a,b,c)
 
+socDay :: SGraph -> SCParams -> Int -> SGraph
 socDay sgraph params day =
   let
     (!alpha, !beta, !gamma) = params
