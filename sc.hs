@@ -91,7 +91,7 @@ main = do
         return t2
       else do
         eprintln "disinterning dcaps"
-        let dcaps' = disintern dicIB dcaps
+        let !dcaps' = disintern dicIB dcaps
         t2 <- getTiming
         eprintln ("saving string dcaps in " ++ saveName)
         saveData dcaps' saveName
