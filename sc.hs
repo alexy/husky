@@ -51,6 +51,8 @@ loadAnyGraph f1 f2 dicName =
 -- TODO: Cale suggested using builder for toAscList
 -- on #haskell circa 2010-06-22 -- see Utils.hs
 
+-- or might disintern into a Trie to lookup faster:
+
 disintern !ib =
  in M.foldWithKey step M.empty
    where

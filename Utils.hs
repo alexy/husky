@@ -20,3 +20,11 @@ foldWithKey' f z m = foldl' step z (IM.toList m)
 
 -- toAscList t = builder (foldrWithKey (\k x xs -> (\cons nil -> cons (k,x) xs)) (\cons nil -> nil) t)
 -- Then it'd fuse.
+
+-- @kmc:
+-- System.CPUTime.getCPUTime
+
+-- @FunctorSalad:
+-- system "ps -p $PPID -o etime,cmd"
+-- the ,cmd is just there for diagnosis
+-- 'system' from System.Process
