@@ -28,13 +28,15 @@ suffix = flip isSuffixOf
 loadAnyGraph :: String -> String -> String -> IO (Graph, Graph, IntMapBS,Timings)
 loadAnyGraph f1 f2 dicName = 
   if suffix f1 ".hsb.zip" then do
+    let gotDic = dicName == "none"
     !g1 <- loadData f1
     t1 <- getTiming $ Just "loading binary dreps timing: "
     !g2 <- loadData f2
     t2 <- getTiming $ Just "loading binary dments timing: "
     -- we load only the IntMap part of IntBS here, which is stored first
-    dicIB <- if dicName == "none" then return IM.empty else loadData dicName
-    return (g1, g2, dicIB, [t2,t1])
+    dicIB <- if gotDic then return IM.empty else loadData dicName
+    t3 <- getTiming $ if gotDic then Just "loading dic timing: " else Nothing
+    return (g1, g2, dicIB, [t3,t2,t1])
   else 
   if suffix f1 ".json.hdb" then do
     -- may dump dic on disk right there:
@@ -44,8 +46,9 @@ loadAnyGraph f1 f2 dicName =
     (!dic',!g2) <- runTCM (fetchGraph f2 dic        Nothing (Just 10000))
     t2 <- getTiming $ Just "loading json dments timing: "
     saveData dic' dicName
+    t3 <- getTiming $ Just "saving dic timing: "
     eprintln "saved the user<=>int dictionary"
-    return (g1, g2, backIB dic', [t2,t1])
+    return (g1, g2, backIB dic', [t3,t2,t1])
   else error "unrecognized graph file extension" 
 
 
