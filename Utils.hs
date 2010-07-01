@@ -8,6 +8,7 @@ import Data.List (foldl')
 import qualified Data.IntMap as IM
 import Data.IntMap (IntMap)
 import System.CPUTime
+import Debug.Trace
 
 -- our strict version of M.foldWithKey
 -- the step function obeys the parent's param order
@@ -34,9 +35,12 @@ foldWithKey' f z m = foldl' step z (IM.toList m)
 
 type Timings = [Int]
 
-getTiming :: IO Int
-getTiming = do
+getTiming :: Maybe String -> IO Int
+getTiming msg = do
   t <- getCPUTime
   -- how do I convert 1e9 to teh type of 1000000000?
-  let timing = fromIntegral t `div` 1000000000
+  let timing = let x = fromIntegral t `div` 1000000000 in
+                   case msg of
+                     Nothing -> x
+                     Just s -> trace (s ++ (show x)) x
   return timing

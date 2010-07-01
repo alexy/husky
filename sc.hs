@@ -29,9 +29,9 @@ loadAnyGraph :: String -> String -> String -> IO (Graph, Graph, IntMapBS,Timings
 loadAnyGraph f1 f2 dicName = 
   if suffix f1 ".hsb.zip" then do
     !g1 <- loadData f1
-    t1 <- getTiming
+    t1 <- getTiming $ Just "loading binary dreps timing: "
     !g2 <- loadData f2
-    t2 <- getTiming
+    t2 <- getTiming $ Just "loading binary dments timing: "
     -- we load only the IntMap part of IntBS here, which is stored first
     dicIB <- if dicName == "none" then return IM.empty else loadData dicName
     return (g1, g2, dicIB, [t2,t1])
@@ -40,9 +40,9 @@ loadAnyGraph f1 f2 dicName =
     -- may dump dic on disk right there:
     -- TODO there gotta be some monadic gymnastics for that!
     (!dic,!g1) <- runTCM (fetchGraph f1 IntBS.empty Nothing (Just 10000))
-    t1 <- getTiming
+    t1 <- getTiming $ Just "loading json dreps timing: "
     (!dic',!g2) <- runTCM (fetchGraph f2 dic        Nothing (Just 10000))
-    t2 <- getTiming
+    t2 <- getTiming $ Just "loading json dments timing: "
     saveData dic' dicName
     eprintln "saved the user<=>int dictionary"
     return (g1, g2, backIB dic', [t2,t1])
@@ -86,18 +86,18 @@ main = do
     if dicName == "none" 
       then do
         eprintln ("saving int dcaps in " ++ saveName)
-        t2 <- getTiming
+        t2 <- getTiming Nothing
         saveData dcaps saveName
         return t2
       else do
         eprintln "disinterning dcaps"
         -- TODO !dcaps' takes longer?
         let !dcaps' = disintern dicIB dcaps
-        t2 <- getTiming
+        t2 <- getTiming $ Just "disinterning dcaps timing: "
         eprintln ("saving string dcaps in " ++ saveName)
         saveData dcaps' saveName
         return t2
-  t3 <- getTiming
+  t3 <- getTiming $ Just "saving dcaps timing: "
   
   let ts = reverse $ [t3,t2] ++ t1 ++ t0
   eprintln ("timings: " ++ show ts)

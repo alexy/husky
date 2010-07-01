@@ -125,7 +125,7 @@ socRun dreps dments opts = do
           insn m u  = M.insert u nus m
           !sgraph1  = trace ("now got " ++ show (M.size ustats')) sgraph {ustatsSG = ustats'}
           !sgraph2  = socDay sgraph1 params day
-        t <- getTiming -- milliseconds
+        t <- getTiming $ Just ("day " ++ (show day) ++ " timing: ") -- milliseconds
         -- TODO trace t here
         return (sgraph2,t:ts)
     
