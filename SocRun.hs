@@ -126,6 +126,7 @@ socRun dreps dments opts = do
           !sgraph1  = trace ("now got " ++ show (M.size ustats')) sgraph {ustatsSG = ustats'}
           !sgraph2  = socDay sgraph1 params day
         t <- getTiming -- milliseconds
+        -- TODO trace t here
         return (sgraph2,t:ts)
     
     foldl' tick (return (sgraph,[])) [firstDay..lastDay]

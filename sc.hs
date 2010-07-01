@@ -28,9 +28,9 @@ suffix = flip isSuffixOf
 loadAnyGraph :: String -> String -> String -> IO (Graph, Graph, IntMapBS,Timings)
 loadAnyGraph f1 f2 dicName = 
   if suffix f1 ".hsb.zip" then do
-    g1 <- loadData f1
+    !g1 <- loadData f1
     t1 <- getTiming
-    g2 <- loadData f2
+    !g2 <- loadData f2
     t2 <- getTiming
     -- we load only the IntMap part of IntBS here, which is stored first
     dicIB <- if dicName == "none" then return IM.empty else loadData dicName
@@ -39,9 +39,9 @@ loadAnyGraph f1 f2 dicName =
   if suffix f1 ".json.hdb" then do
     -- may dump dic on disk right there:
     -- TODO there gotta be some monadic gymnastics for that!
-    (dic,g1) <- runTCM (fetchGraph f1 IntBS.empty Nothing (Just 10000))
+    (!dic,!g1) <- runTCM (fetchGraph f1 IntBS.empty Nothing (Just 10000))
     t1 <- getTiming
-    (dic',g2) <- runTCM (fetchGraph f2 dic        Nothing (Just 10000))
+    (!dic',!g2) <- runTCM (fetchGraph f2 dic        Nothing (Just 10000))
     t2 <- getTiming
     saveData dic' dicName
     eprintln "saved the user<=>int dictionary"
@@ -91,6 +91,7 @@ main = do
         return t2
       else do
         eprintln "disinterning dcaps"
+        -- TODO !dcaps' takes longer?
         let !dcaps' = disintern dicIB dcaps
         t2 <- getTiming
         eprintln ("saving string dcaps in " ++ saveName)
