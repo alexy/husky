@@ -10,10 +10,11 @@ where
 
 import Graph
 import Utils (Timings,getTiming)
-import Data.Ord (comparing)
+-- import Data.Ord (comparing)
 import Data.List (groupBy,sortBy,foldl1')
 import Data.Function (on)
 import qualified IntMap as M
+import qualified AdaptMap as A
 import IntMap ((!))
 -- is there a difference between foldl' from Foldable or List?
 -- import Data.Foldable (foldl')
@@ -30,29 +31,40 @@ import Control.Monad ((>=>))
 --   hFlush stderr
 
 type DCaps = M.IntMap [(Int,Double)]
-type TalkBalance = M.IntMap Int
+type TalkBalance = A.IntMap Int
 
 emptyTalk :: TalkBalance
-emptyTalk = M.empty
+emptyTalk = A.empty
 
-data UserStats = UserStats {
-    socUS  :: !Double,
-    dayUS  :: !Int,
-    insUS  :: TalkBalance,
-    outsUS :: TalkBalance,
-    totUS  :: TalkBalance,
-    balUS  :: TalkBalance}
+data UserStats = 
+  UserStats { socUS  :: {-# UNPACK #-} !Double
+            , dayUS  :: {-# UNPACK #-} !Int
+            , insUS  :: !TalkBalance
+            , outsUS :: !TalkBalance
+            , totUS  :: !TalkBalance
+            , balUS  :: !TalkBalance
+            }
 
 newUserStats :: Double -> Int -> UserStats
 newUserStats soc day = UserStats {socUS = soc, dayUS = day,
   insUS = emptyTalk, outsUS = emptyTalk, totUS = emptyTalk, balUS = emptyTalk}
 
 type UStats = M.IntMap UserStats
-data SocRun = SocRun {alphaSR :: !Double, betaSR :: !Double, gammaSR :: !Double,
-                      socInitSR :: !Double, maxDaysSR :: Maybe Int}
+data SocRun = 
+  SocRun { alphaSR   :: {-# UNPACK #-} !Double
+         , betaSR    :: {-# UNPACK #-} !Double 
+         , gammaSR   :: {-# UNPACK #-} !Double
+         , socInitSR :: {-# UNPACK #-} !Double 
+         , maxDaysSR :: !(Maybe Int) 
+         }
 optSocRun = SocRun 0.1 0.5 0.5 1.0 Nothing
 
-data SGraph = SGraph {drepsSG :: !Graph, dmentsSG :: !Graph, dcapsSG :: !DCaps, ustatsSG :: !UStats}
+data SGraph = 
+  SGraph { drepsSG  :: !Graph
+         , dmentsSG :: !Graph 
+         , dcapsSG  :: !DCaps 
+         , ustatsSG :: !UStats 
+         }
 
 type SCParams = (Double,Double,Double)
 
@@ -243,18 +255,18 @@ socUserDaySum sgraph day user =
           case dr_ of
             Nothing -> 0
             Just dr ->
-              M.foldWithKey step 0 dr
+              A.foldWithKey step 0 dr
               where
                  step !to !num !res = {-# SCC "outStep" #-}
-                  let !toBal = M.findWithDefault 0 to bal in
+                  let !toBal = A.findWithDefault 0 to bal in
                   if toBal >= 0 then res
                   else
                     let !toSoc = getSocCap ustats to in
                       if toSoc == 0.0 then res
                       else
                         let
-                          !toOut = M.findWithDefault 1 to outs
-                          !toTot = M.findWithDefault 1 to tot
+                          !toOut = A.findWithDefault 1 to outs
+                          !toTot = A.findWithDefault 1 to tot
                           !term = fromIntegral (num * toOut * toBal * toTot) * toSoc
                           in
                           res - term -- equivalent to sum of abs terms
@@ -264,7 +276,7 @@ socUserDaySum sgraph day user =
           case dm_ of
             Nothing -> (0.0,0.0)
             Just dm ->
-              M.foldWithKey step (0.0,0.0) dm
+              A.foldWithKey step (0.0,0.0) dm
               where
                  step !to !num res@(!backSum,!allSum) = {-# SCC "inStep" #-}
                   let
@@ -272,10 +284,10 @@ socUserDaySum sgraph day user =
                     if toSoc == 0.0 then res
                     else
                       let
-                        !toIn  = M.findWithDefault 1 to ins
-                        !toTot = M.findWithDefault 1 to tot
+                        !toIn  = A.findWithDefault 1 to ins
+                        !toTot = A.findWithDefault 1 to tot
                         !allTerm  = fromIntegral (num * toIn * toTot) * toSoc
-                        !toBal = M.findWithDefault 0 to bal
+                        !toBal = A.findWithDefault 0 to bal
                         !backTerm = if toBal <= 0 then 0.0 else fromIntegral toBal * allTerm
                         in
                         (backSum + backTerm,allSum + allTerm)
@@ -284,9 +296,9 @@ socUserDaySum sgraph day user =
         terms = (outSum, inSumBack, inSumAll)
 
 
-        addMaps       = M.unionWith (+)
-        addsMaps      = M.unionsWith (+)
-        negateMap     = M.map negate
+        addMaps       = A.unionWith (+)
+        addsMaps      = A.unionsWith (+)
+        negateMap     = A.map negate
         -- this is buggy, as uncovered in OCaml -- missing key in first adds positive from second
         -- in OCaml, replaced by hashMergeWithDef, so the op is supplied the left operand, e.g. 0
         -- subtractMaps = M.unionWith (-)

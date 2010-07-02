@@ -8,6 +8,7 @@ import IntBS (IntBS)
 import qualified Data.Trie as T
 import Text.JSONb
 import qualified IntMap as M
+import qualified AdaptMap as A
 import qualified Data.ByteString.Char8 as B
 import Data.ByteString.Char8 (ByteString)
 import qualified Data.Ratio as R
@@ -41,7 +42,7 @@ json2reps dic (Object o) = (dic',reps)
   where (users,vs) = unzip . T.toList $ o
         (dic',users') = mapAccumL IB.insert dic users
         nums = map json2num vs
-        reps = M.fromList (zip users' nums)
+        reps = A.fromList (zip users' nums)
 j2reps _ = error "bad reps"        
     
 json2num :: JSON -> Int

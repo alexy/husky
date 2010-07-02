@@ -6,6 +6,8 @@ import qualified IntMap as IM
 import IntMap ((!))
 import Utils (Timings,getTiming)
 import qualified Data.Map as M
+import qualified AdaptMap as A
+import Data.Binary
 import SocRun
 import Data.Maybe (listToMaybe)
 import Graph
@@ -15,6 +17,7 @@ import TokyoGraph (fetchGraph)
 import BinaryGraph
 import qualified IntBS
 import IntBS (IntBS(..),IntMapBS)
+import Control.Monad (liftM)
 
 eprintln s = do
 	hPutStrLn stderr s
@@ -104,3 +107,7 @@ main = do
   
   let ts = reverse $ [t3,t2] ++ t1 ++ t0
   eprintln ("timings: " ++ show ts)
+
+instance (A.AdaptIntMap e , Binary e) => Binary (A.IntMap e) where
+     put m = put (A.size m) >> mapM_ put (A.toAscList m)
+     get   = liftM A.fromList get
