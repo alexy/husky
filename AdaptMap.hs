@@ -1,3 +1,4 @@
+
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE CPP          #-}
 {-# LANGUAGE MagicHash    #-}
@@ -17,12 +18,15 @@ import GHC.Word
 -- A "Nat" is a natural machine word (an unsigned Int)
 type Nat = Word
 
+{-# INLINE natFromInt #-}
 natFromInt :: Key -> Nat
 natFromInt i = fromIntegral i
 
+{-# INLINE intFromNat #-}
 intFromNat :: Nat -> Key
 intFromNat w = fromIntegral w
 
+{-# INLINE shiftRL #-}
 shiftRL :: Nat -> Key -> Nat
 #if __GLASGOW_HASKELL__
 shiftRL (W# x) (I# i)
@@ -32,15 +36,19 @@ shiftRL x i   = shiftR x i
 #endif
 
 --  Big endian operations  
+{-# INLINE maskW #-}
 maskW :: Nat -> Nat -> Prefix
 maskW i m = intFromNat (i .&. (complement (m-1) `xor` m))
 
+{-# INLINE shorter #-}
 shorter :: Mask -> Mask -> Bool
 shorter m1 m2 = (natFromInt m1) > (natFromInt m2)
 
+{-# INLINE branchMask #-}
 branchMask :: Prefix -> Prefix -> Mask
 branchMask p1 p2 = intFromNat (highestBitMask (natFromInt p1 `xor` natFromInt p2))
 
+{-# INLINE highestBitMask #-}
 highestBitMask :: Nat -> Nat
 highestBitMask x0
   = case (x0 .|. shiftRL x0 1) of
@@ -53,16 +61,21 @@ highestBitMask x0
 
 --  Endian independent bit twiddling
 
+{-# INLINE zero #-}
 zero :: Key -> Mask -> Bool
 zero i m = (natFromInt i) .&. (natFromInt m) == 0
 
+{-# INLINE nomatch #-}
+{-# INLINE   match #-}
 nomatch,match :: Key -> Prefix -> Mask -> Bool
 nomatch i p m = (mask i m) /= p
 match   i p m = (mask i m) == p
 
+{-# INLINE zeroN #-}
 zeroN :: Nat -> Nat -> Bool
 zeroN i m = (i .&. m) == 0
 
+{-# INLINE mask #-}
 mask :: Key -> Mask -> Prefix
 mask i m = maskW (natFromInt i) (natFromInt m)
 
@@ -102,51 +115,63 @@ class AdaptIntMap a where
 
 ------------------------------------------------------------------------
 
+{-# INLINE unionWith #-}
 unionWith :: AdaptIntMap a => (a -> a -> a) -> IntMap a -> IntMap a -> IntMap a
 unionWith f m1 m2 = unionWithKey (\_ x y -> f x y) m1 m2
 
+{-# INLINE map #-}
 map :: AdaptIntMap a => (a -> a) -> IntMap a -> IntMap a
 map f m = mapWithKey (\_ x -> f x) m
 
 -- | /O(min(n,W))/. Lookup the value at a key in the map. See also 'Data.Map.lookup'.
+{-# INLINE lookup #-}
 lookup :: AdaptIntMap a => Key -> IntMap a -> Maybe a
 lookup k t = case natFromInt k of nk -> lookupN nk t
 
+{-# INLINE member #-}
 member :: AdaptIntMap a => Key -> IntMap a -> Bool
 member k m = case lookup k m of
       Nothing -> False
       Just _  -> True
 
+{-# INLINE notMember #-}
 notMember :: AdaptIntMap a => Key -> IntMap a -> Bool
 notMember k m = not $ member k m
 
+{-# INLINE findWithDefault #-}
 findWithDefault :: AdaptIntMap a => a -> Key -> IntMap a -> a
 findWithDefault def k m
   = case lookup k m of
       Nothing -> def
       Just x  -> x
 
+{-# INLINE insertWith #-}
 insertWith :: AdaptIntMap a => (a -> a -> a) -> Key -> a -> IntMap a -> IntMap a
 insertWith f k x t = insertWithKey (\_ x' y' -> f x' y') k x t
 
+{-# INLINE unionsWith #-}
 unionsWith :: AdaptIntMap a => (a->a->a) -> [IntMap a] -> IntMap a
 unionsWith f ts = foldlStrict (unionWith f) empty ts
 
+{-# INLINE foldlStrict #-}
 foldlStrict :: (a -> b -> a) -> a -> [b] -> a
 foldlStrict f z xs
   = case xs of
       []     -> z
       (x:xx) -> let z' = f z x in seq z' (foldlStrict f z' xx)
 
+{-# INLINE foldWithKey #-}
 foldWithKey :: AdaptIntMap a => (Key -> a -> b -> b) -> b -> IntMap a -> b
 foldWithKey f z t = foldr f z t
 
+{-# INLINE fromList #-}
 fromList :: AdaptIntMap a => [(Key,a)] -> IntMap a
 fromList xs
   = foldlStrict ins empty xs
   where
     ins t (k,x)  = insert k x t
 
+{-# INLINE toAscList #-}
 toAscList :: AdaptIntMap a => IntMap a -> [(Key,a)]
 toAscList t
   = -- NOTE: the following algorithm only works for big-endian trees
@@ -205,7 +230,6 @@ instance AdaptIntMap Int where
             | otherwise     -> join k (TipInt k x) ky t
           NilInt -> TipInt k x
 
-    {-# INLINE insert #-}
     insert k x t
       = case t of
           BinInt p m l r
