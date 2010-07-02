@@ -18,6 +18,7 @@ import BinaryGraph
 import qualified IntBS
 import IntBS (IntBS(..),IntMapBS)
 import Control.Monad (liftM)
+import Intern (disintern)
 
 eprintln s = do
 	hPutStrLn stderr s
@@ -53,21 +54,6 @@ loadAnyGraph f1 f2 dicName =
     eprintln "saved the user<=>int dictionary"
     return (g1, g2, backIB dic', [t3,t2,t1])
   else error "unrecognized graph file extension" 
-
-
--- this is not strict enough, the thing explodes
--- how can we ensure M.insert stays strict?
--- might as well disintern into a Trie instead
--- TODO: Cale suggested using builder for toAscList
--- on #haskell circa 2010-06-22 -- see Utils.hs
-
--- or might disintern into a Trie to lookup faster:
-
-disintern !ib =
- IM.foldWithKey step M.empty
-   where
-     step !k !v !res = {-# SCC "disintern.step" #-} case ib ! k of
-                          !name -> M.insert name v res
 
   
 main :: IO ()

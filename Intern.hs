@@ -1,21 +1,27 @@
+{-# LANGUAGE BangPatterns #-}
+
 module Intern (disintern) where
 
 -- disintern[1..3] are by Daniel Fischer, @dafis
 -- he also hacked IntMap into a stricter one:
 
+import IntBS
 import qualified IntMap as M
--- we used to import Utils (foldWithKey')
--- but now our IntMap's one is strict enough
+import IntMap ((!))
+import qualified Data.Trie as T
+  
+-- TODO: Cale suggested using builder for toAscList
+-- on #haskell circa 2010-06-22 -- see Utils.hs
+
+-- here M is Data.Map.Map ByteString ...
+-- disintern1 dic =
+--  let !ib = backIB dic
+--      step !k !v !res = {-# SCC "disintern.step" #-} case ib ! k of
+--                           !name -> M.insert name v res
+--  in
+--  IM.foldWithKey step M.empty
 
 -- to disintern to a Trie:
-  
-disintern1 dic =
- let !ib = backIB dic in
-     step !k !v !res = {-# SCC "disintern.step" #-} case ib ! k of
-                          !name -> M.insert name v res
- in M.foldWithKey step M.empty
-
--- also try
 
 disintern2 dic dcaps =
  let !tr = trieIB dic
@@ -28,6 +34,17 @@ disintern2 dic dcaps =
 
 -- A related way to try to disintern to a Data.Map,
 
-disintern3 dic dcaps =
- let !mdic = Data.Map.fromDistinctAscList . Data.Trie.toList $ trieIB dic
- in Data.Map.map (dcaps !) mdic
+-- disintern3 dic dcaps =
+--  let !mdic = M.fromDistinctAscList . T.toList $ trieIB dic
+--  in M.map (dcaps !) mdic
+
+-- this is not strict enough, the thing explodes
+-- how can we ensure M.insert stays strict?
+-- might as well disintern into a Trie instead
+
+-- current disinterning into a trie without fmap
+disintern mdic =
+ M.foldWithKey step T.empty
+   where
+     step !k !v !res = {-# SCC "disintern.step" #-} case mdic ! k of
+                          !name -> T.insert name v res
