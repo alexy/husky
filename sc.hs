@@ -15,6 +15,7 @@ import TokyoGraph (fetchGraph)
 import BinaryGraph
 import qualified IntBS
 import IntBS (IntBS(..),IntMapBS)
+import Intern (disintern,disintern2)
 
 eprintln s = do
 	hPutStrLn stderr s
@@ -25,7 +26,8 @@ suffix = flip isSuffixOf
 
 -- we have to do both to thread dic through tokyos
 -- there gotta be some monadic way to do with one and combine
-loadAnyGraph :: String -> String -> String -> IO (Graph, Graph, IntMapBS,Timings)
+-- loadAnyGraph :: String -> String -> String -> IO (Graph, Graph, IntMapBS, Timings)
+loadAnyGraph :: String -> String -> String -> IO (Graph, Graph, IntBS, Timings)
 loadAnyGraph f1 f2 dicName = 
   if suffix f1 ".hsb.zip" then do
     let gotDic = dicName == "none"
@@ -34,9 +36,9 @@ loadAnyGraph f1 f2 dicName =
     !g2 <- loadData f2
     t2 <- getTiming $ Just "loading binary dments timing: "
     -- we load only the IntMap part of IntBS here, which is stored first
-    dicIB <- if gotDic then return IM.empty else loadData dicName
+    dic <- if gotDic then return IntBS.empty else loadData dicName
     t3 <- getTiming $ if gotDic then Just "loading dic timing: " else Nothing
-    return (g1, g2, dicIB, [t3,t2,t1])
+    return (g1, g2, dic, [t3,t2,t1])
   else 
   if suffix f1 ".json.hdb" then do
     -- may dump dic on disk right there:
@@ -48,23 +50,8 @@ loadAnyGraph f1 f2 dicName =
     saveData dic' dicName
     t3 <- getTiming $ Just "saving dic timing: "
     eprintln "saved the user<=>int dictionary"
-    return (g1, g2, backIB dic', [t3,t2,t1])
+    return (g1, g2, dic', [t3,t2,t1])
   else error "unrecognized graph file extension" 
-
-
--- this is not strict enough, the thing explodes
--- how can we ensure M.insert stays strict?
--- might as well disintern into a Trie instead
--- TODO: Cale suggested using builder for toAscList
--- on #haskell circa 2010-06-22 -- see Utils.hs
-
--- or might disintern into a Trie to lookup faster:
-
-disintern !ib =
- IM.foldWithKey step M.empty
-   where
-     step !k !v !res = {-# SCC "disintern.step" #-} case ib ! k of
-                          !name -> M.insert name v res
 
   
 main :: IO ()
@@ -75,11 +62,11 @@ main = do
   	" user-int dictionary in " ++ dicName ++ ", saving dcaps in " ++ saveName)
   let maxDays :: Maybe Int 
       !maxDays = listToMaybe . map read $ restArgs
-  (!dreps, !dments, !dicIB, t0) <- loadAnyGraph drepsName dmentsName dicName
+  (!dreps, !dments, !dic, t0) <- loadAnyGraph drepsName dmentsName dicName
   
   eprintln ("loaded dreps from "   ++ drepsName  ++ ", " ++ (show . IM.size $ dreps))
   eprintln ("loaded dments from "  ++ dmentsName ++ ", " ++ (show . IM.size $ dments))
-  eprintln ("using dictionary in " ++ dicName    ++ ", " ++ (show . IM.size $ dicIB))
+  eprintln ("using dictionary in " ++ dicName    ++ ", " ++ (show . totalIB $ dic))
   
   (sgraph,t1) <- socRun dreps dments optSocRun {maxDaysSR= maxDays}
   let !dcaps = dcapsSG sgraph
@@ -95,7 +82,8 @@ main = do
       else do
         eprintln "disinterning dcaps"
         -- TODO !dcaps' takes longer?
-        let !dcaps' = disintern dicIB dcaps
+        -- disintern uses IntMap part, disintern2 uses Trie
+        let !dcaps' = disintern2 dic dcaps
         t2 <- getTiming $ Just "disinterning dcaps timing: "
         eprintln ("saving string dcaps in " ++ saveName)
         saveData dcaps' saveName
