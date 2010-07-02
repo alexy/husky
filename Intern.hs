@@ -9,6 +9,9 @@ import IntBS
 import qualified IntMap as M
 import IntMap ((!))
 import qualified Data.Trie as T
+import SocRun (DCaps)
+
+type DCs = T.Trie [(Int,Double)]
   
 -- TODO: Cale suggested using builder for toAscList
 -- on #haskell circa 2010-06-22 -- see Utils.hs
@@ -23,6 +26,7 @@ import qualified Data.Trie as T
 
 -- to disintern to a Trie:
 
+disintern2 :: IntBS -> DCaps -> DCs
 disintern2 dic dcaps =
  let !tr = trieIB dic
  in fmap (dcaps !) tr
@@ -43,6 +47,7 @@ disintern2 dic dcaps =
 -- might as well disintern into a Trie instead
 
 -- current disinterning into a trie without fmap
+disintern :: IntBS -> DCaps -> DCs
 disintern dic =
  let !ib = backIB dic
      step !k !v !res = {-# SCC "disintern.step" #-} case ib ! k of
