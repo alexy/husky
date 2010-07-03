@@ -47,4 +47,5 @@ lookupInt dic i =
   let m = backIB dic in
   M.lookup i m
   
-saveIB ib fileName = saveData (backIB ib) fileName
+saveIMap fileName dic = saveData fileName (backIB dic)
+saveTrie fileName dic = saveData fileName (trieIB dic)

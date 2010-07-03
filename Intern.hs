@@ -1,6 +1,9 @@
 {-# LANGUAGE BangPatterns #-}
 
-module Intern (disintern,disintern2) where
+module Intern 
+  ( disintern
+  , disintern2
+  , DCs) where
 
 -- disintern[1..3] are by Daniel Fischer, @dafis
 -- he also hacked IntMap into a stricter one:
