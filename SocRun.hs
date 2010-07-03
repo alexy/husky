@@ -35,24 +35,39 @@ type TalkBalance = M.IntMap Int
 emptyTalk :: TalkBalance
 emptyTalk = M.empty
 
-data UserStats = UserStats {
-    socUS  :: !Double,
-    dayUS  :: !Int,
-    insUS  :: TalkBalance,
-    outsUS :: TalkBalance,
-    totUS  :: TalkBalance,
-    balUS  :: TalkBalance}
+data UserStats =
+  UserStats
+    { socUS  :: {-# UNPACK #-} !Double
+    , dayUS  :: {-# UNPACK #-} !Int
+    , insUS  :: !TalkBalance
+    , outsUS :: !TalkBalance
+    , totUS  :: !TalkBalance
+    , balUS  :: !TalkBalance
+    }
 
 newUserStats :: Double -> Int -> UserStats
 newUserStats soc day = UserStats {socUS = soc, dayUS = day,
   insUS = emptyTalk, outsUS = emptyTalk, totUS = emptyTalk, balUS = emptyTalk}
 
 type UStats = M.IntMap UserStats
-data SocRun = SocRun {alphaSR :: !Double, betaSR :: !Double, gammaSR :: !Double,
-                      socInitSR :: !Double, maxDaysSR :: Maybe Int}
+data SocRun =
+  SocRun
+    { alphaSR   :: {-# UNPACK #-} !Double
+    , betaSR    :: {-# UNPACK #-} !Double
+    , gammaSR   :: {-# UNPACK #-} !Double
+    , socInitSR :: {-# UNPACK #-} !Double
+    , maxDaysSR :: !(Maybe Int)
+    }
+
 optSocRun = SocRun 0.1 0.5 0.5 1.0 Nothing
 
-data SGraph = SGraph {drepsSG :: !Graph, dmentsSG :: !Graph, dcapsSG :: !DCaps, ustatsSG :: !UStats}
+data SGraph =
+  SGraph
+    { drepsSG  :: !Graph
+    , dmentsSG :: !Graph
+    , dcapsSG  :: !DCaps
+    , ustatsSG :: !UStats
+    }
 
 type SCParams = (Double,Double,Double)
 
