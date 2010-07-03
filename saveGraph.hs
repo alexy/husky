@@ -8,7 +8,7 @@ import qualified Data.ByteString.Lazy as BL
 import qualified Data.Binary as D
 import Codec.Compression.GZip
 import qualified IntBS as IB
-import IntBS (IntBS,backIB)
+import IntBS
 
 eprintln s = do hPutStrLn stderr s
                 hFlush stderr
@@ -27,7 +27,7 @@ main = do
       graphFile = saveBase ++ ".int" ++ ext
       usersFile = saveBase ++ ".dic" ++ ext
   dic <- case users of
-          Just fileName | (fileName /= "no") -> loadData fileName
+          Just fileName | (fileName /= "no") -> loadAnyData fileName
           _ -> return IB.empty
   eprintln ("reading graph from cabinet: " ++ fileName
     ++ "\n  saving graph in " ++ graphFile ++ ", users in " ++ usersFile
@@ -36,6 +36,5 @@ main = do
 
   (dic,graph) <- runTCM (fetchGraph fileName dic maxElems progress)
   eprintln "well, let's save it now, shall we?"
-  saveData graph graphFile
-  saveData dic usersFile
-  
+  saveData graphFile graph
+  saveData usersFile dic
