@@ -29,28 +29,29 @@ suffix = flip isSuffixOf
 -- loadAnyGraph :: String -> String -> String -> IO (Graph, Graph, IntMapBS, Timings)
 loadAnyGraph :: String -> String -> String -> IO (Graph, Graph, IntBS, Timings)
 loadAnyGraph f1 f2 dicName = 
-  if suffix f1 ".json.hdb" then do
-    -- may dump dic on disk right there:
-    -- TODO there gotta be some monadic gymnastics for that!
-    (!dic,!g1) <- runTCM (fetchGraph f1 IntBS.empty Nothing (Just 10000))
-    t1 <- getTiming $ Just "loading json dreps timing: "
-    (!dic',!g2) <- runTCM (fetchGraph f2 dic        Nothing (Just 10000))
-    t2 <- getTiming $ Just "loading json dments timing: "
-    saveData dic' dicName
-    t3 <- getTiming $ Just "saving dic timing: "
-    eprintln "saved the user<=>int dictionary"
-    return (g1, g2, dic', [t3,t2,t1])
-  else 
-    let gotDic = dicName == "none"
-    !g1 <- loadDataZip f1
-    t1 <- getTiming $ Just "loading binary dreps timing: "
-    !g2 <- loadDataZip f2
-    t2 <- getTiming $ Just "loading binary dments timing: "
-    -- we load only the IntMap part of IntBS here, which is stored first
-    dic <- if gotDic then return IntBS.empty else loadData dicName
-    t3 <- getTiming $ if gotDic then Just "loading dic timing: " else Nothing
-    return (g1, g2, dic, [t3,t2,t1])
-\
+  if suffix f1 ".json.hdb" 
+    then do
+      -- may dump dic on disk right there:
+      -- TODO there gotta be some monadic gymnastics for that!
+      (!dic,!g1) <- runTCM (fetchGraph f1 IntBS.empty Nothing (Just 10000))
+      t1 <- getTiming $ Just "loading json dreps timing: "
+      (!dic',!g2) <- runTCM (fetchGraph f2 dic        Nothing (Just 10000))
+      t2 <- getTiming $ Just "loading json dments timing: "
+      saveAnyData dicName dic'
+      t3 <- getTiming $ Just "saving dic timing: "
+      eprintln "saved the user<=>int dictionary"
+      return (g1, g2, dic', [t3,t2,t1])
+    else do
+      !g1 <- loadAnyData f1
+      t1 <- getTiming $ Just "loading binary dreps timing: "
+      !g2 <- loadAnyData f2
+      t2 <- getTiming $ Just "loading binary dments timing: "
+      -- we load only the IntMap part of IntBS here, which is stored first
+      let gotDic = dicName == "none"
+      dic <- if gotDic then return IntBS.empty else loadData dicName
+      t3 <- getTiming $ if gotDic then Just "loading dic timing: " else Nothing
+      return (g1, g2, dic, [t3,t2,t1])
+
   
 main :: IO ()
 main = do
@@ -75,7 +76,7 @@ main = do
       then do
         eprintln ("saving int dcaps in " ++ saveName)
         t2 <- getTiming Nothing
-        saveData dcaps saveName
+        saveAnyData saveName dcaps
         return t2
       else do
         eprintln "disinterning dcaps"
@@ -84,7 +85,7 @@ main = do
         let !dcaps' = disintern2 dic dcaps
         t2 <- getTiming $ Just "disinterning dcaps timing: "
         eprintln ("saving string dcaps in " ++ saveName)
-        saveData dcaps' saveName
+        saveData saveName dcaps'
         return t2
   t3 <- getTiming $ Just "saving dcaps timing: "
   
