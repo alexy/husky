@@ -36,5 +36,5 @@ main = do
 
   (dic,graph) <- runTCM (fetchGraph fileName dic maxElems progress)
   eprintln "well, let's save it now, shall we?"
-  saveData graphFile graph
-  saveData usersFile dic
+  saveAnyData graphFile graph
+  saveAnyData usersFile dic
