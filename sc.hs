@@ -82,7 +82,7 @@ main = do
         eprintln "disinterning dcaps"
         -- TODO !dcaps' takes longer?
         -- disintern uses IntMap part, disintern2 uses Trie
-        let !dcaps' = disintern2 dic dcaps
+        let !dcaps' = disintern dic dcaps
         t2 <- getTiming $ Just "disinterning dcaps timing: "
         eprintln ("saving string dcaps in " ++ saveName)
         saveData saveName dcaps'
