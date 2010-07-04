@@ -85,7 +85,7 @@ main = do
         let !dcaps' = disintern dic dcaps
         t2 <- getTiming $ Just "disinterning dcaps timing: "
         eprintln ("saving string dcaps in " ++ saveName)
-        saveData saveName dcaps'
+        saveAnyData saveName dcaps'
         return t2
   t3 <- getTiming $ Just "saving dcaps timing: "
   
