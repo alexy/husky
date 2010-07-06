@@ -1,21 +1,29 @@
 {-# LANGUAGE BangPatterns #-}
 
 module Intern 
-  ( disintern
-  , disintern2
-  , DCs) where
+  ( disintern2trie1
+  , disintern2trie2  
+  , disintern2map1
+  , DCT
+  , DCM ) where
 
 -- disintern[1..3] are by Daniel Fischer, @dafis
 -- he also hacked IntMap into a stricter one:
 
 import IntBS
-import qualified IntMap as M
+import qualified IntMap    as IM
 import IntMap ((!))
 import qualified Data.Trie as T
+import Data.Trie (Trie)
+import qualified Data.Map  as M
+import Data.Map (Map)
 import SocRun (DCaps)
+import Data.ByteString.Char8 (ByteString)
 
-type DCs = T.Trie [(Int,Double)]
-  
+type Vals = [(Int,Double)]
+type DCT = Trie Vals
+type DCM = Map ByteString Vals
+    
 -- TODO: Cale suggested using builder for toAscList
 -- on #haskell circa 2010-06-22 -- see Utils.hs
 
@@ -29,8 +37,8 @@ type DCs = T.Trie [(Int,Double)]
 
 -- to disintern to a Trie:
 
-disintern2 :: IntBS -> DCaps -> DCs
-disintern2 dic dcaps =
+disintern2trie2 :: IntBS -> DCaps -> DCT
+disintern2trie2 dic dcaps =
  let !tr = trieIB dic
  in fmap (dcaps !) tr
 
@@ -50,10 +58,22 @@ disintern2 dic dcaps =
 -- might as well disintern into a Trie instead
 
 -- current disinterning into a trie without fmap
-disintern :: IntBS -> DCaps -> DCs
-disintern dic =
+-- TODO generalize to both Trie Map ByteString 
+-- by parameterizing empty and insert,
+-- curry and benchmark
+
+disintern2trie1 :: IntBS -> DCaps -> DCT
+disintern2trie1 dic =
  let !ib = backIB dic
      step !k !v !res = {-# SCC "disintern.step" #-} case ib ! k of
                           !name -> T.insert name v res
  in                          
- M.foldWithKey step T.empty
+ IM.foldWithKey step T.empty
+
+disintern2map1 :: IntBS -> DCaps -> DCM
+disintern2map1 dic =
+ let !ib = backIB dic
+     step !k !v !res = {-# SCC "disintern.step" #-} case ib ! k of
+                          !name -> M.insert name v res
+ in                          
+ IM.foldWithKey step M.empty
