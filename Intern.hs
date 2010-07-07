@@ -19,10 +19,11 @@ import qualified Data.Map  as M
 import Data.Map (Map)
 import SocRun (DCaps)
 import Data.ByteString.Char8 (ByteString)
+import SLP
 
-type Vals = [(Int,Double)]
-type DCT = Trie Vals
-type DCM = Map ByteString Vals
+type Vals = SLP
+type DCT  = Trie Vals
+type DCM  = Map ByteString Vals
     
 -- TODO: Cale suggested using builder for toAscList
 -- on #haskell circa 2010-06-22 -- see Utils.hs
