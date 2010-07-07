@@ -21,15 +21,12 @@ eprintln s = do
 	hPutStrLn stderr s
 	hFlush stderr
 
--- may use Sustem.FilePath.takeExtension repeatedly:
-suffix = flip isSuffixOf
-
 -- we have to do both to thread dic through tokyos
 -- there gotta be some monadic way to do with one and combine
 -- loadAnyGraph :: String -> String -> String -> IO (Graph, Graph, IntMapBS, Timings)
 loadAnyGraph :: String -> String -> String -> IO (Graph, Graph, IntBS, Timings)
 loadAnyGraph f1 f2 dicName = 
-  if suffix f1 ".json.hdb" 
+  if ".json.hdb" `isSuffixOf` f1  
     then do
       -- may dump dic on disk right there:
       -- TODO there gotta be some monadic gymnastics for that!
@@ -81,7 +78,7 @@ main = do
         eprintln "disinterning dcaps"
         -- TODO !dcaps' takes longer?
         -- disintern uses IntMap part, disintern2 uses Trie
-        if isInfixOf ".map" saveName 
+        if ".map" `isInfixOf` saveName 
           then do
             let !dcaps' = disintern2map1 dic dcaps
             eprintln ("saving map string dcaps in " ++ saveName)
