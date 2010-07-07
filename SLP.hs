@@ -1,12 +1,17 @@
 {-# LANGUAGE BangPatterns #-}
 
-module SLP 
-  ( SLP
+module SLP
+  ( SLP(..)
   , toIDL
+  , appSLP
+  , singSLP
+  , P(..)
   ) where
 
 import Data.Binary
 import Data.Binary.Get
+import Data.Binary.Put
+import Unsafe.Coerce
 
 data P = P {-# UNPACK #-} !Int {-# UNPACK #-} !Double
 
@@ -26,6 +31,17 @@ revSLP sls = go Nil sls
     go !acc (Cns p tl) = go (Cns p acc) tl
     go acc Nil = acc
 
+appSLP :: SLP -> SLP -> SLP
+appSLP Nil l = l
+appSLP l Nil = l
+appSLP (Cns p tl) l = Cns p (go tl)
+  where
+    go Nil = l
+    go (Cns q u) = Cns q (go u)
+
+singSLP :: Int -> Double -> SLP
+singSLP i d = Cns (P i d) Nil
+
 instance Binary SLP where
     put sls = do
         let go (Cns p tl) = put p >> go tl
@@ -40,11 +56,11 @@ instance Binary SLP where
         go Nil len
 
 instance Binary P where
-    put (P i f) = put i >> put f
+    put (P i f) = putWord64be (fromIntegral i) >> putWord64be (unsafeCoerce f)
     get = do
-        !i <- get
-        !f <- get
-        return $! P i f
+        !i <- fmap fromIntegral getWord64be
+        !f <- fmap unsafeCoerce getWord64be
+        return $ P i f
 
 toIDL :: SLP -> [(Int,Double)]
 toIDL (Cns (P i f) tl) = (i,f):toIDL tl

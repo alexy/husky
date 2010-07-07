@@ -13,8 +13,8 @@ import Utils (Timings,getTiming)
 import Data.Ord (comparing)
 import Data.List (groupBy,sortBy,foldl1')
 import Data.Function (on)
-import qualified IntMap as M
-import IntMap ((!))
+import qualified Data.BAIntMap as M
+import Data.BAIntMap ((!))
 -- is there a difference between foldl' from Foldable or List?
 -- import Data.Foldable (foldl')
 import Data.List (maximum,foldl')
@@ -22,6 +22,7 @@ import System.IO
 import Debug.Trace
 import Data.Maybe
 import Control.Monad ((>=>))
+import SLP
 --import Data.Nthable -- generalized fst
 --import Prelude hiding (fst,snd)
 
@@ -29,7 +30,7 @@ import Control.Monad ((>=>))
 --   hPrint stderr x
 --   hFlush stderr
 
-type DCaps = M.IntMap [(Int,Double)]
+type DCaps = M.IntMap SLP -- [(Int,Double)]
 type TalkBalance = M.IntMap Int
 
 emptyTalk :: TalkBalance
@@ -39,10 +40,10 @@ data UserStats =
   UserStats
     { socUS  :: {-# UNPACK #-} !Double
     , dayUS  :: {-# UNPACK #-} !Int
-    , insUS  :: !TalkBalance
-    , outsUS :: !TalkBalance
-    , totUS  :: !TalkBalance
-    , balUS  :: !TalkBalance
+    , insUS  :: TalkBalance
+    , outsUS :: TalkBalance
+    , totUS  :: TalkBalance
+    , balUS  :: TalkBalance
     }
 
 newUserStats :: Double -> Int -> UserStats
@@ -125,7 +126,7 @@ socRun dreps dments opts = do
       			      in
                     trace ((show . M.size $ dranges) ++ " total users, doing days from " ++ (show firstDay) ++ " to " ++ (show x'))
                     x'
-                    
+
       tick :: IO (SGraph,Timings) -> Int -> IO (SGraph,Timings)
       tick st day = do
         (sgraph,ts) <- st
@@ -143,8 +144,8 @@ socRun dreps dments opts = do
         t <- getTiming $ Just ("day " ++ (show day) ++ " timing: ") -- milliseconds
         -- TODO trace t here
         return (sgraph2,t:ts)
-    
-    foldl' tick (return (sgraph,[])) [firstDay..lastDay]
+
+    foldl' tick (return (sgraph,[])) [firstDay .. lastDay]
 
 -- socDay sgraph params day = undefined
 
@@ -215,8 +216,8 @@ socDay sgraph params day =
             -- IntMap has no insertWith', so we revert to insertWith:
             -- TODO just keep it as a list and append instead of maps:
             !soc -> M.alter addDay user res
-              where addDay Nothing   = Just [(day,soc)]
-                    addDay (Just ds) = Just ((day,soc):ds)
+              where addDay Nothing   = Just (singSLP day soc) -- [(day,soc)]
+                    addDay (Just ds) = Just (Cns (P day soc) ds) -- ((day,soc):ds)
 
     in
     sgraph {ustatsSG= ustats', dcapsSG= dcaps'}
