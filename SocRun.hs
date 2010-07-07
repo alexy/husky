@@ -13,8 +13,8 @@ import Utils (Timings,getTiming)
 import Data.Ord (comparing)
 import Data.List (groupBy,sortBy,foldl1')
 import Data.Function (on)
-import qualified Data.BAIntMap as M
-import Data.BAIntMap ((!))
+import qualified IntMap as M
+import IntMap ((!))
 -- is there a difference between foldl' from Foldable or List?
 -- import Data.Foldable (foldl')
 import Data.List (maximum,foldl')
