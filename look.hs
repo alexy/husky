@@ -6,7 +6,7 @@ import qualified Data.Trie as T
 import Data.Trie (Trie)
 import qualified Data.Map as M
 import Data.Map as M
-import Data.List (isInfixOf)
+import Data.List (isInfixOf,isSuffixOf)
 
 -- put this and loadXXX into BinaryGraph:
 import qualified Data.ByteString.Lazy as L
@@ -16,18 +16,16 @@ import Data.ByteString.Char8 (pack, ByteString)
 import Data.Binary
 import Codec.Compression.GZip
 
--- these two look the same,
--- unify with -> IO a?
-loadDCapsTrie :: FilePath -> IO (Trie SLP)
-loadDCapsTrie fp = do
-    bs <- fmap decompress $ L.readFile fp
-    return $! decode bs
-
-loadDCapsMap :: FilePath -> IO (Map ByteString SLP)
-loadDCapsMap fp = do
-    bs <- fmap decompress $ L.readFile fp
-    return $! decode bs
-
+loadAnyData :: (Binary a) => FilePath -> IO a
+loadAnyData fileName = 
+    if ".zip" `isSuffixOf` fileName 
+      then do
+        bs <- fmap decompress $ L.readFile fileName
+        return $! decode bs
+      else do
+        bs <- decodeFile fileName
+        return $! bs
+        
 showVals :: Maybe SLP -> IO ()
 showVals (Just v) = do
             putStr " => "
@@ -42,11 +40,11 @@ main = do
     S.putStr user
     if ".map" `isInfixOf` dcfile 
       then do
-        !dc <- loadDCapsMap dcfile
+        !dc <- loadAnyData dcfile
         putStrLn $ "Done reading trie dc, size " ++ show (M.size dc)
         showVals (M.lookup user dc)
       else do
-        !dc <- loadDCapsTrie dcfile
+        !dc <- loadAnyData dcfile
         putStrLn $ "Done reading map dc, size " ++ show (T.size dc)
         showVals (T.lookup user dc)
         
