@@ -16,6 +16,7 @@ import BinaryGraph
 import qualified IntBS
 import IntBS (IntBS(..),IntMapBS)
 import Intern (disintern2trie1,disintern2map1)
+import Invert
 
 eprintln s = do
 	hPutStrLn stderr s
@@ -24,56 +25,52 @@ eprintln s = do
 -- we have to do both to thread dic through tokyos
 -- there gotta be some monadic way to do with one and combine
 -- loadAnyGraph :: String -> String -> String -> IO (Graph, Graph, IntMapBS, Timings)
-loadAnyGraph :: String -> String -> String -> IO (Graph, Graph, IntBS, Timings)
-loadAnyGraph f1 f2 dicName = 
-  if ".json.hdb" `isSuffixOf` f1  
+loadAnyGraph :: String -> String -> IO (Graph, IntBS, Timings)
+loadAnyGraph drepsName dicName = 
+  if ".json.hdb" `isSuffixOf` drepsName
     then do
       -- may dump dic on disk right there:
       -- TODO there gotta be some monadic gymnastics for that!
-      (!dic,!g1) <- runTCM (fetchGraph f1 IntBS.empty Nothing (Just 10000))
+      (!dic,!g) <- runTCM (fetchGraph drepsName IntBS.empty Nothing (Just 10000))
       t1 <- getTiming $ Just "loading json dreps timing: "
-      (!dic',!g2) <- runTCM (fetchGraph f2 dic        Nothing (Just 10000))
-      t2 <- getTiming $ Just "loading json dments timing: "
-      saveAnyData dicName dic'
-      t3 <- getTiming $ Just "saving dic timing: "
+      saveAnyData dicName dic
+      t2 <- getTiming $ Just "saving dic timing: "
       eprintln "saved the user<=>int dictionary"
-      return (g1, g2, dic', [t3,t2,t1])
+      return (g, dic, [t2,t1])
     else do
-      !g1 <- loadAnyData f1
+      !g <- loadAnyData drepsName
       t1 <- getTiming $ Just "loading binary dreps timing: "
-      !g2 <- loadAnyData f2
-      t2 <- getTiming $ Just "loading binary dments timing: "
-      -- we load only the IntMap part of IntBS here, which is stored first
       let gotDic = dicName == "none"
       dic <- if gotDic then return IntBS.empty else loadData dicName
-      t3 <- getTiming $ if gotDic then Just "loading dic timing: " else Nothing
-      return (g1, g2, dic, [t3,t2,t1])
+      t2 <- getTiming $ if gotDic then Just "loading dic timing: " else Nothing
+      return (g, dic, [t2,t1])
   
 main :: IO ()
 main = do
   args <- getArgs
   let drepsName:dmentsName:dicName:saveName:restArgs = args
-  eprintln ("reading graph from " ++ drepsName ++ ", " ++ dmentsName ++ 
-  	" user-int dictionary in " ++ dicName ++ ", saving dcaps in " ++ saveName)
+  eprintln ("reading graph from " ++ drepsName ++ 
+  	" with user<=>int dictionary from " ++ dicName ++ ", saving dcaps in " ++ saveName)
   let maxDays :: Maybe Int 
       !maxDays = listToMaybe . map read $ restArgs
-  (!dreps, !dments, !dic, t0) <- loadAnyGraph drepsName dmentsName dicName
-  
+  (!dreps, !dic, tLoad) <- loadAnyGraph drepsName dicName
+  let !dments = invert1 dreps  
+  tInvert <- getTiming $ Just "inverting into dments: "
+        
   eprintln ("loaded dreps from "   ++ drepsName  ++ ", " ++ (show . IM.size $ dreps))
-  eprintln ("loaded dments from "  ++ dmentsName ++ ", " ++ (show . IM.size $ dments))
+  eprintln ("inverted into dments, "  ++ (show . IM.size $ dments))
   eprintln ("using dictionary in " ++ dicName    ++ ", " ++ (show . totalIB $ dic))
   
-  (sgraph,t1) <- socRun dreps dments optSocRun {maxDaysSR= maxDays}
+  (sgraph,tSocRun) <- socRun dreps dments optSocRun {maxDaysSR= maxDays}
   let !dcaps = dcapsSG sgraph
       
   eprintln "computed sgraph"
-  t2 <-  
+  tDisintern <-  
     if dicName == "none" 
       then do
         eprintln ("saving int dcaps in " ++ saveName)
-        t2 <- getTiming Nothing
         saveAnyData saveName dcaps
-        return t2
+        getTiming Nothing
       else do
         eprintln "disinterning dcaps"
         -- TODO !dcaps' takes longer?
@@ -87,9 +84,8 @@ main = do
             let !dcaps' = disintern2trie1 dic dcaps
             eprintln ("saving trie string dcaps in " ++ saveName)
             saveAnyData saveName dcaps'
-        t2 <- getTiming $ Just "disinterning dcaps timing: "
-        return t2
-  t3 <- getTiming $ Just "saving dcaps timing: "
+        getTiming $ Just "disinterning dcaps timing: "
+  tSaving <- getTiming $ Just "saving dcaps timing: "
   
-  let ts = reverse $ [t3,t2] ++ t1 ++ t0
+  let ts = reverse $ [tSaving,tDisintern] ++ tSocRun ++ [tInvert] ++ tLoad
   eprintln ("timings: " ++ show ts)
