@@ -48,7 +48,7 @@ loadAnyGraph drepsName dicName =
 main :: IO ()
 main = do
   args <- getArgs
-  let drepsName:dmentsName:dicName:saveName:restArgs = args
+  let drepsName:dicName:saveName:restArgs = args
   eprintln ("reading graph from " ++ drepsName ++ 
   	" with user<=>int dictionary from " ++ dicName ++ ", saving dcaps in " ++ saveName)
   let maxDays :: Maybe Int 
