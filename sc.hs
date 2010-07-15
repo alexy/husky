@@ -41,7 +41,7 @@ loadAnyGraph drepsName dicName =
       !g <- loadAnyData drepsName
       t1 <- getTiming $ Just "loading binary dreps timing: "
       let gotDic = dicName == "none"
-      dic <- if gotDic then return IntBS.empty else loadData dicName
+      dic <- if gotDic then return IntBS.empty else loadAnyData dicName
       t2 <- getTiming $ if gotDic then Just "loading dic timing: " else Nothing
       return (g, dic, [t2,t1])
   
